@@ -1,7 +1,6 @@
 rootProject.name = 'caver-java'
 include 'codegen'
 include 'core'
+include 'core_android'
 include 'console'
 include 'integration-test'
-
-enableFeaturePreview('STABLE_PUBLISHING')
