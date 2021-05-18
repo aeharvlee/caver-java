@@ -53,6 +53,13 @@ build_test: &build_test
         ./gradlew clean
         ./gradlew build --scan --debug
 
+android_instrumented_test: &android_instrumented_test
+  run:
+    name:
+      command: |
+        ./gradlew clean
+        ./gradlew connectedAndroidTest
+
 jobs:
   build:
     <<: *machine_ubuntu
@@ -131,10 +138,7 @@ jobs:
             adb shell settings put global window_animation_scale 0.0
             adb shell settings put global transition_animation_scale 0.0
             adb shell settings put global animator_duration_scale 0.0
-      - run:
-          name: Run unit tests on emulator
-          command: |
-            adb shell am instrument -w -m    -e debug false -e class 'com.klaytn.caver.AccountTest' com.klaytn.caver.test/androidx.test.runner.AndroidJUnitRunner
+      - *android_instrumented_test
       - persist_to_workspace:
           root: ~/
           paths: 

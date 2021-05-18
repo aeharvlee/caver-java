@@ -1,4 +1,7 @@
+import android.content.Context;
+
 import androidx.test.ext.junit.runners.AndroidJUnit4;
+import androidx.test.platform.app.InstrumentationRegistry;
 
 import com.klaytn.caver.Caver;
 import com.klaytn.caver.contract.Contract;
@@ -35,6 +38,13 @@ import static org.junit.Assert.fail;
 
 @RunWith(AndroidJUnit4.class)
 public class KIP7Test {
+    @Test
+    public void useAppContext() {
+        // Context of the app under test.
+        Context appContext = InstrumentationRegistry.getInstrumentation().getTargetContext();
+        System.out.println(appContext.getPackageName());
+        assertEquals("com.klaytn.caver.core_android", appContext.getPackageName());
+    }
 
     public static KIP7 kip7contract;
     public static final String CONTRACT_NAME = "Kale";
