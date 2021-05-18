@@ -143,6 +143,8 @@ jobs:
           root: ~/
           paths: 
             - circleci-caver-java-android/*
+      - store_test_results:
+          path: core_android/build/outputs/androidTest-results/connected
 
 workflows:
   version: 2
