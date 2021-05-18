@@ -1,3 +1,5 @@
+package com.klaytn.caver.core_android.common.kct.kip7;
+
 import android.content.Context;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
@@ -42,7 +44,6 @@ public class KIP7Test {
     public void useAppContext() {
         // Context of the app under test.
         Context appContext = InstrumentationRegistry.getInstrumentation().getTargetContext();
-        System.out.println(appContext.getPackageName());
         assertEquals("com.klaytn.caver.core_android", appContext.getPackageName());
     }
 

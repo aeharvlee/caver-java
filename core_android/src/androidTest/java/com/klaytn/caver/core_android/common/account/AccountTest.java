@@ -1,3 +1,5 @@
+package com.klaytn.caver.core_android.common.account;
+
 import android.content.Context;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
@@ -25,7 +27,6 @@ public class AccountTest {
     public void useAppContext() {
         // Context of the app under test.
         Context appContext = InstrumentationRegistry.getInstrumentation().getTargetContext();
-        System.out.println(appContext.getPackageName());
         assertEquals("com.klaytn.caver.core_android", appContext.getPackageName());
     }
 
