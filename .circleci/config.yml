@@ -55,7 +55,7 @@ build_test: &build_test
 
 android_instrumented_test: &android_instrumented_test
   run:
-    name:
+    name: "Android instrumented test"
       command: |
         ./gradlew clean
         ./gradlew connectedAndroidTest
