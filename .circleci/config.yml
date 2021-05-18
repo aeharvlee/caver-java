@@ -108,7 +108,7 @@ jobs:
           command: |
             SYSTEM_IMAGES="system-images;android-29;default;x86"
             sdkmanager "$SYSTEM_IMAGES"
-            echo "no" | avdmanager --verbose create avd -k "$SYSTEM_IMAGES"
+            echo "no" | avdmanager --verbose create avd -n test -k "$SYSTEM_IMAGES"
       - run:
           name: Launch emulator
           command: |
