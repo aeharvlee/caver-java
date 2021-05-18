@@ -108,11 +108,11 @@ jobs:
           command: |
             SYSTEM_IMAGES="system-images;android-29;default;x86"
             sdkmanager "$SYSTEM_IMAGES"
-            echo "no" | avdmanager --verbose create avd -n caver -k "$SYSTEM_IMAGES"
+            echo "no" | avdmanager --verbose create avd -k "$SYSTEM_IMAGES"
       - run:
           name: Launch emulator
           command: |
-            emulator -avd caver -delay-adb -verbose -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim
+            emulator -avd test -delay-adb -verbose -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim
           background: true
       - run:
           name: Generate cache key
@@ -134,7 +134,7 @@ jobs:
       - run:
           name: Run unit tests on emulator
           command: |
-            adb shell am instrument -w -m    -e debug false -e class 'com.klaytn.caver.SampleTest' com.klaytn.caver.test/androidx.test.runner.AndroidJUnitRunner
+            adb shell am instrument -w -m    -e debug false -e class 'com.klaytn.caver.AccountTest' com.klaytn.caver.test/androidx.test.runner.AndroidJUnitRunner
       - persist_to_workspace:
           root: ~/
           paths: 
