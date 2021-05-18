@@ -8,7 +8,7 @@ machine_ubuntu: &machine_ubuntu
 android_machine_ubuntu: &android_machine_ubuntu
   working_directory: ~/circleci-caver-java-android
   machine:
-    image: ubuntu-1604:201903-01
+    image: android:202102-01
 
 pull_klaytn_image: &pull_klaytn_image
   run:
