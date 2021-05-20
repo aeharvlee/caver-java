@@ -53,12 +53,13 @@ build_test: &build_test
         ./gradlew clean
         ./gradlew build --scan --debug -x :core_android:build
 
-android_instrumented_test: &android_instrumented_test
+build_test_android: &build_test_android
   run:
-    name: "Android instrumented test"
+    name: "Build and do instrumented test on android emulator"
     command: |
       ./gradlew clean
       ./gradlew connectedAndroidTest
+      ./gradlew build --scan --debug
 
 jobs:
   build:
@@ -78,9 +79,11 @@ jobs:
               awk '/version '\''/' build.gradle
             fi
       - *build_test
+      - store_test_results:
+          path: core/build/test-results/test
       - persist_to_workspace:
           root: ~/
-          paths: 
+          paths:
             - circleci-caver-java-major/*
 
   android_build:
@@ -94,8 +97,8 @@ jobs:
           name: "Change to Android version"
           command: |
             version=$(.circleci/version.sh)
-            sed -i "s/version '.*'/version '${version}-android'/" build.gradle 
-            sed -i "s/ext.web3jVersion = '.*'/ext.web3jVersion = '$web3j_version-android'/" build.gradle 
+            sed -i "s/version '.*'/version '${version}-android'/" build.gradle
+            sed -i "s/ext.web3jVersion = '.*'/ext.web3jVersion = '$web3j_version-android'/" build.gradle
             sed -i "s/java.util.concurrent.CompletableFuture/java8.util.concurrent.CompletableFuture/" core/src/test/java/com/klaytn/caver/legacy/scenario/FastTransactionManagerIT.java
 
             if [ -z "$CIRCLE_TAG" ]; then
@@ -138,13 +141,13 @@ jobs:
             adb shell settings put global window_animation_scale 0.0
             adb shell settings put global transition_animation_scale 0.0
             adb shell settings put global animator_duration_scale 0.0
-      - *android_instrumented_test
+      - *build_test_android
+      - store_test_results:
+          path: core_android/build/outputs/androidTest-results/connected
       - persist_to_workspace:
           root: ~/
           paths: 
             - circleci-caver-java-android/*
-      - store_test_results:
-          path: core_android/build/outputs/androidTest-results/connected
 
 workflows:
   version: 2
