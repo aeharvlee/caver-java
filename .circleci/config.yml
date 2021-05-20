@@ -51,7 +51,7 @@ build_test: &build_test
     name: "Build and test"
     command: |
         ./gradlew clean
-        ./gradlew build --scan --debug -x :core_android:assemble
+        ./gradlew build --scan --debug -x :core_android:build
 
 android_instrumented_test: &android_instrumented_test
   run:
