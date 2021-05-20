@@ -18,6 +18,13 @@ plugins {
     id 'idea'
 }
 
+gradleEnterprise {
+    buildScan {
+        termsOfServiceUrl = "https://gradle.com/terms-of-service"
+        termsOfServiceAgree = "yes"
+    }
+}
+
 allprojects {
     version '1.6.0'
     group 'com.klaytn.caver'
