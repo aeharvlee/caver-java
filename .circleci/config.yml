@@ -88,6 +88,7 @@ jobs:
 
   android_build:
     <<: *android_machine_ubuntu
+    resource_class: large
     steps:
       - checkout
       - *pull_klaytn_image
