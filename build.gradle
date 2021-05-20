@@ -38,19 +38,11 @@ configure(allprojects.findAll {it.name != 'core_android'}) {
     javadoc {
         options.encoding = 'UTF-8'
     }
-}
-
-configure(subprojects.findAll {it.name != 'core_android'}) {
-    apply plugin: 'java'
 
     dependencies {
         testCompile "junit:junit:$junitVersion"
         testCompile "ch.qos.logback:logback-core:1.2.3",
                 "ch.qos.logback:logback-classic:1.2.3"
-    }
-
-    repositories {
-        mavenCentral()
     }
 }
 
