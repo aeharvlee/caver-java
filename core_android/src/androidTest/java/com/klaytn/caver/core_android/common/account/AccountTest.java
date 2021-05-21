@@ -1,17 +1,21 @@
 package com.klaytn.caver.core_android.common.account;
 
-import android.content.Context;
-
-import androidx.test.ext.junit.runners.AndroidJUnit4;
-import androidx.test.platform.app.InstrumentationRegistry;
-
 import com.klaytn.caver.Caver;
-import com.klaytn.caver.account.*;
+import com.klaytn.caver.account.Account;
+import com.klaytn.caver.account.AccountKeyFail;
+import com.klaytn.caver.account.AccountKeyLegacy;
+import com.klaytn.caver.account.AccountKeyNil;
+import com.klaytn.caver.account.AccountKeyPublic;
+import com.klaytn.caver.account.AccountKeyRoleBased;
+import com.klaytn.caver.account.AccountKeyWeightedMultiSig;
+import com.klaytn.caver.account.IAccountKey;
+import com.klaytn.caver.account.WeightedMultiSigOptions;
+import com.klaytn.caver.account.WeightedPublicKey;
 import com.klaytn.caver.utils.Utils;
+
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-import org.junit.runner.RunWith;
 import org.web3j.utils.Numeric;
 
 import java.math.BigInteger;
@@ -21,15 +25,7 @@ import java.util.List;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-@RunWith(AndroidJUnit4.class)
 public class AccountTest {
-    @Test
-    public void useAppContext() {
-        // Context of the app under test.
-        Context appContext = InstrumentationRegistry.getInstrumentation().getTargetContext();
-        assertEquals("com.klaytn.caver.core_android", appContext.getPackageName());
-    }
-
     @Rule
     public ExpectedException expectedException = ExpectedException.none();
 
