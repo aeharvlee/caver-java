@@ -26,7 +26,6 @@
 .idea/**/gradle.xml
 .idea/**/libraries
 .gradle/
-gradle.properties
 
 # Output
 build
