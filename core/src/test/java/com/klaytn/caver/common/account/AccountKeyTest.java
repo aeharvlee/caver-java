@@ -1,9 +1,18 @@
 package com.klaytn.caver.common.account;
 
 import com.klaytn.caver.Caver;
-import com.klaytn.caver.account.*;
+import com.klaytn.caver.account.AccountKeyFail;
+import com.klaytn.caver.account.AccountKeyLegacy;
+import com.klaytn.caver.account.AccountKeyNil;
+import com.klaytn.caver.account.AccountKeyPublic;
+import com.klaytn.caver.account.AccountKeyRoleBased;
+import com.klaytn.caver.account.AccountKeyWeightedMultiSig;
+import com.klaytn.caver.account.IAccountKey;
+import com.klaytn.caver.account.WeightedMultiSigOptions;
+import com.klaytn.caver.account.WeightedPublicKey;
 import com.klaytn.caver.utils.AccountKeyPublicUtils;
 import com.klaytn.caver.utils.Utils;
+
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -16,8 +25,12 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
+@RunWith(Suite.class)
+@Suite.SuiteClasses({AccountKeyTest.AccountKeyFailTests.class, AccountKeyTest.AccountKeyLegacyTest.class, AccountKeyTest.AccountKeyPublicTest.class, AccountKeyTest.AccountKeyWeightedMultiSigTest.class, AccountKeyTest.AccountKeyRoleBasedTest.class})
 public class AccountKeyTest {
 
     public static class AccountKeyFailTests {

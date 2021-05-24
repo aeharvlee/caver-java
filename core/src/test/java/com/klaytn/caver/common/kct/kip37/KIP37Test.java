@@ -19,13 +19,15 @@ import com.klaytn.caver.Caver;
 import com.klaytn.caver.contract.Contract;
 import com.klaytn.caver.contract.SendOptions;
 import com.klaytn.caver.kct.kip37.KIP37;
-import com.klaytn.caver.kct.kip7.KIP7;
 import com.klaytn.caver.methods.response.TransactionReceipt;
+
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
 import org.web3j.protocol.exceptions.TransactionException;
 
 import java.io.IOException;
@@ -34,9 +36,18 @@ import java.math.BigInteger;
 import java.util.List;
 import java.util.Map;
 
-import static com.klaytn.caver.base.Accounts.*;
-import static org.junit.Assert.*;
+import static com.klaytn.caver.base.Accounts.BRANDON;
+import static com.klaytn.caver.base.Accounts.LUMAN;
+import static com.klaytn.caver.base.Accounts.WAYNE;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
+
+@RunWith(Suite.class)
+@Suite.SuiteClasses({KIP37Test.ConstructorTest.class, KIP37Test.MintableTest.class, KIP37Test.PausableTest.class, KIP37Test.BurnableTest.class, KIP37Test.IKIP37Test.class, KIP37Test.DetectInterfaceTest.class, KIP37Test.UriTest.class})
 public class KIP37Test {
     public static KIP37 kip37;
     private static final String tokenURI = "https://kip37.example/{id}.json";

@@ -9,17 +9,31 @@ import com.klaytn.caver.transaction.type.AccountUpdate;
 import com.klaytn.caver.transaction.type.FeeDelegatedValueTransfer;
 import com.klaytn.caver.transaction.type.ValueTransfer;
 import com.klaytn.caver.utils.Utils;
-import com.klaytn.caver.wallet.keyring.*;
+import com.klaytn.caver.wallet.keyring.AbstractKeyring;
+import com.klaytn.caver.wallet.keyring.MessageSigned;
+import com.klaytn.caver.wallet.keyring.MultipleKeyring;
+import com.klaytn.caver.wallet.keyring.PrivateKey;
+import com.klaytn.caver.wallet.keyring.RoleBasedKeyring;
+import com.klaytn.caver.wallet.keyring.SignatureData;
+import com.klaytn.caver.wallet.keyring.SingleKeyring;
+
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
 
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
+@RunWith(Suite.class)
+@Suite.SuiteClasses({KeyringContainerTest.generateTest.class, KeyringContainerTest.newKeyringTest.class, KeyringContainerTest.getKeyringTest.class, KeyringContainerTest.addTest.class, KeyringContainerTest.removeTest.class, KeyringContainerTest.signMessageTest.class, KeyringContainerTest.signTest.class, KeyringContainerTest.signAsFeePayerTest.class})
 public class KeyringContainerTest {
 
     static void validateSingleKeyring(AbstractKeyring actual, String expectAddress, String expectKey) {

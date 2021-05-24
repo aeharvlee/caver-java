@@ -13,50 +13,64 @@ machine_ubuntu: &machine_ubuntu
 android_machine_ubuntu: &android_machine_ubuntu
   working_directory: ~/circleci-caver-java-android
   machine:
-    image: ubuntu-1604:201903-01
+    image: android:202102-01
+
+setup_android_test_files: &setup_android_test_files
+  run:
+    name: "Setup android test files"
+    command: |
+      bash .circleci/scripts/setup_android_test.sh
 
 pull_klaytn_image: &pull_klaytn_image
   run:
     name: "Pull and tag Klaytn image"
     command: |
-          docker pull klaytn/build_base:latest
-          docker image tag klaytn/build_base:latest klaytn
+      docker pull klaytn/build_base:latest
+      docker image tag klaytn/build_base:latest klaytn
 
 check_test_network: &check_test_network
   run:
     name: "Check test network"
     command: |
-        MAXRETRY=600
-        RETRY=0
-        while [ $RETRY -lt $MAXRETRY ]
-        do
-            if curl --fail -H "Content-Type: application/json" --data '{"jsonrpc":"2.0","method":"rpc_modules","params":[],"id":1}' http://localhost:8551 2>/dev/null; then
-                echo "Klaytn RPC server is up"
-                break
-            else
-                echo "wait for Klyatn RPC server..."
-                sleep 5
-            fi
-            RETRY=$(($RETRY+5))
-        done
-        if [ $RETRY -eq $MAXRETRY ]; then
-            echo "failed to connect Klaytn RPC server"
-            exit 1
-        fi
+      MAXRETRY=600
+      RETRY=0
+      while [ $RETRY -lt $MAXRETRY ]
+      do
+          if curl --fail -H "Content-Type: application/json" --data '{"jsonrpc":"2.0","method":"rpc_modules","params":[],"id":1}' http://localhost:8551 2>/dev/null; then
+              echo "Klaytn RPC server is up"
+              break
+          else
+              echo "wait for Klyatn RPC server..."
+              sleep 5
+          fi
+          RETRY=$(($RETRY+5))
+      done
+      if [ $RETRY -eq $MAXRETRY ]; then
+          echo "failed to connect Klaytn RPC server"
+          exit 1
+      fi
 
 start_test_network: &start_test_network
   run:
     name: "Start test network"
     working_directory: .circleci/images
     command: |
-        docker-compose up -d
+      docker-compose up -d
 
 build_test: &build_test
   run:
     name: "Build and test"
     command: |
-        ./gradlew clean
-        ./gradlew build --scan --debug
+      ./gradlew clean
+      ./gradlew build --debug -x :core_android:build
+
+build_test_android: &build_test_android
+  run:
+    name: "Build and do instrumented test on android emulator"
+    command: |
+      ./gradlew clean
+      ./gradlew connectedAndroidTest
+      ./gradlew build --debug -x :core_android:build
 
 jobs:
   build:
@@ -78,13 +92,14 @@ jobs:
       - *build_test
       - persist_to_workspace:
           root: ~/
-          paths: 
+          paths:
             - circleci-caver-java-major/*
 
   android_build:
     <<: *android_machine_ubuntu
     steps:
       - checkout
+      - *setup_android_test_files
       - *pull_klaytn_image
       - *start_test_network
       - *check_test_network
@@ -107,10 +122,39 @@ jobs:
 
             awk '/version '\''/' build.gradle
             awk '/ext.web3jVersion = '\''/' build.gradle
-      - *build_test
+
+      - run:
+          name: Create avd
+          command: |
+            SYSTEM_IMAGES="system-images;android-29;default;x86"
+            sdkmanager "$SYSTEM_IMAGES"
+            echo "no" | avdmanager --verbose create avd -n test -k "$SYSTEM_IMAGES"
+      - run:
+          name: Launch emulator
+          command: |
+            emulator -avd test -delay-adb -verbose -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim
+          background: true
+      - run:
+          name: Generate cache key
+          command: |
+            find . -name 'build.gradle' | sort | xargs cat |
+            shasum | awk '{print $1}' > /tmp/gradle_cache_seed
+      - restore_cache:
+          key: gradle-v1-{{ arch }}-{{ checksum "/tmp/gradle_cache_seed" }}
+      - run:
+          name: Wait for emulator to start
+          command: |
+            circle-android wait-for-boot
+      - run:
+          name: Disable emulator animations
+          command: |
+            adb shell settings put global window_animation_scale 0.0
+            adb shell settings put global transition_animation_scale 0.0
+            adb shell settings put global animator_duration_scale 0.0
+      - *build_test_android
       - persist_to_workspace:
           root: ~/
-          paths: 
+          paths:
             - circleci-caver-java-android/*
 
   tag_verify:
@@ -155,28 +199,28 @@ jobs:
       - run:
           name: "Push to release branch"
           command: |
-              echo "push to release branch: /release/${CIRCLE_TAG%-*}"
-              git checkout -b release/${CIRCLE_TAG%-*}
-              git push origin release/${CIRCLE_TAG%-*}
+            echo "push to release branch: /release/${CIRCLE_TAG%-*}"
+            git checkout -b release/${CIRCLE_TAG%-*}
+            git push origin release/${CIRCLE_TAG%-*}
       - run:
-          name: "Install hub" 
+          name: "Install hub"
           command: |
-              curl -sSLf https://github.com/github/hub/releases/download/v2.12.3/hub-linux-amd64-2.12.3.tgz | \
-                tar zxf - --strip-components=1 -C /tmp && \
-                sudo mv /tmp/bin/hub /usr/local/bin/hub
-              type hub
+            curl -sSLf https://github.com/github/hub/releases/download/v2.12.3/hub-linux-amd64-2.12.3.tgz | \
+              tar zxf - --strip-components=1 -C /tmp && \
+              sudo mv /tmp/bin/hub /usr/local/bin/hub
+            type hub
       - run:
-          name: "Create pull request" 
+          name: "Create pull request"
           command: |
-              version=$(hub pr list -s open -L 10 -f "%H%n")
-              echo $version
+            version=$(hub pr list -s open -L 10 -f "%H%n")
+            echo $version
 
-              if [[ $version == *"release/${CIRCLE_TAG%-*}"* ]]; then
-                echo "PR already exist"
-              else
-                echo "hub pull-request -m "[Master] release/$CIRCLE_TAG QA Signoff" -b $CIRCLE_PROJECT_USERNAME:master -h $CIRCLE_PROJECT_USERNAME:${CIRCLE_TAG%-*}"
-                echo -e "[Master] release/${CIRCLE_TAG%-*} QA Sign-off\n\nThis PR is automatically created by CI to release a new official version of $CIRCLE_PROJECT_REPONAME.\n\nWhen this PR is approved by QA team, a new version will be released." | hub pull-request -b $CIRCLE_PROJECT_USERNAME:master -h $CIRCLE_PROJECT_USERNAME:release/${CIRCLE_TAG%-*} -r $GITHUB_reviewer -l circleci -F-
-              fi
+            if [[ $version == *"release/${CIRCLE_TAG%-*}"* ]]; then
+              echo "PR already exist"
+            else
+              echo "hub pull-request -m "[Master] release/$CIRCLE_TAG QA Signoff" -b $CIRCLE_PROJECT_USERNAME:master -h $CIRCLE_PROJECT_USERNAME:${CIRCLE_TAG%-*}"
+              echo -e "[Master] release/${CIRCLE_TAG%-*} QA Sign-off\n\nThis PR is automatically created by CI to release a new official version of $CIRCLE_PROJECT_REPONAME.\n\nWhen this PR is approved by QA team, a new version will be released." | hub pull-request -b $CIRCLE_PROJECT_USERNAME:master -h $CIRCLE_PROJECT_USERNAME:release/${CIRCLE_TAG%-*} -r $GITHUB_reviewer -l circleci -F-
+            fi
 
   major_tagging:
     <<: *defaults
@@ -186,24 +230,24 @@ jobs:
       - run:
           name: "Generate tag"
           command: |
-              current_version=$(.circleci/version.sh)
-              echo "git tag v$current_version"
-              git config --global user.email "team.devops@groundx.xyz"
-              git config --global user.name "circleci-klaytn"
-              git tag -a v$current_version -m "$CIRCLE_STAGE"
-              git push origin v$current_version
+            current_version=$(.circleci/version.sh)
+            echo "git tag v$current_version"
+            git config --global user.email "team.devops@groundx.xyz"
+            git config --global user.name "circleci-klaytn"
+            git tag -a v$current_version -m "$CIRCLE_STAGE"
+            git push origin v$current_version
       - run:
           name: "Delete release branch"
           command: |
-              #delete release branch. it trigger by merge title
-              version=v$(.circleci/version.sh)
+            #delete release branch. it trigger by merge title
+            version=v$(.circleci/version.sh)
 
-              if [[ "release/v" = $(git log --oneline -1 | grep -o "release/v") ]]; then
-                echo "Delete branch release/$version"
-                git push origin --delete release/$version
-              else
-                echo "Need to delete branch manually"
-              fi  
+            if [[ "release/v" = $(git log --oneline -1 | grep -o "release/v") ]]; then
+              echo "Delete branch release/$version"
+              git push origin --delete release/$version
+            else
+              echo "Need to delete branch manually"
+            fi
 
   major_publish:
     <<: *machine_ubuntu
@@ -226,11 +270,11 @@ jobs:
       - run:
           name: "Publish major version"
           command: |
-              version=v$(.circleci/version.sh)
+            version=v$(.circleci/version.sh)
 
-              echo "Publishing a major release! version=$version"
-              ./gradlew clean publish --stacktrace --debug
-              ./gradlew closeAndReleaseRepository --stacktrace --debug
+            echo "Publishing a major release! version=$version"
+            ./gradlew clean publish --stacktrace --debug
+            ./gradlew closeAndReleaseRepository --stacktrace --debug
 
 
   android_publish:
@@ -243,100 +287,139 @@ jobs:
       - *start_test_network
       - *check_test_network
       - run:
-          name: "Publish android version"
+          name: "Change to Android version"
           command: |
-              version=$(.circleci/version.sh)
-              sed -i "s/version '.*'/version '${version}-android'/" build.gradle
-              sed -i "s/ext.web3jVersion = '.*'/ext.web3jVersion = '$web3j_version-android'/" build.gradle 
+            version=$(.circleci/version.sh)
+            sed -i "s/version '.*'/version '${version}-android'/" build.gradle
+            sed -i "s/ext.web3jVersion = '.*'/ext.web3jVersion = '$web3j_version-android'/" build.gradle
+            sed -i "s/java.util.concurrent.CompletableFuture/java8.util.concurrent.CompletableFuture/" core/src/test/java/com/klaytn/caver/legacy/scenario/FastTransactionManagerIT.java
+
+            if [ -z "$CIRCLE_TAG" ]; then
+              echo "this is not RC version"
+            else
+              echo "trigger CIRCLE_TAG $CIRCLE_TAG"
+              sed -i "s/version '.*'/version '${CIRCLE_TAG:1}-android'/" build.gradle
+              sed -i "s/ext.web3jVersion = '.*'/ext.web3jVersion = '$web3j_version-android'/" build.gradle
               sed -i "s/java.util.concurrent.CompletableFuture/java8.util.concurrent.CompletableFuture/" core/src/test/java/com/klaytn/caver/legacy/scenario/FastTransactionManagerIT.java
+            fi
 
-              if [ -z "$CIRCLE_TAG" ]; then
-                echo "this is not RC version"
-              else
-                echo "trigger CIRCLE_TAG $CIRCLE_TAG"
-                sed -i "s/version '.*'/version '${CIRCLE_TAG:1}-android'/" build.gradle
-                sed -i "s/ext.web3jVersion = '.*'/ext.web3jVersion = '$web3j_version-android'/" build.gradle
-                sed -i "s/java.util.concurrent.CompletableFuture/java8.util.concurrent.CompletableFuture/" core/src/test/java/com/klaytn/caver/legacy/scenario/FastTransactionManagerIT.java
-              fi              
+      - run:
+          name: Create avd
+          command: |
+            SYSTEM_IMAGES="system-images;android-29;default;x86"
+            sdkmanager "$SYSTEM_IMAGES"
+            echo "no" | avdmanager --verbose create avd -n test -k "$SYSTEM_IMAGES"
+      - run:
+          name: Launch emulator
+          command: |
+            emulator -avd test -delay-adb -verbose -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim
+          background: true
+      - run:
+          name: Generate cache key
+          command: |
+            find . -name 'build.gradle' | sort | xargs cat |
+            shasum | awk '{print $1}' > /tmp/gradle_cache_seed
+      - restore_cache:
+          key: gradle-v1-{{ arch }}-{{ checksum "/tmp/gradle_cache_seed" }}
+      - run:
+          name: Wait for emulator to start
+          command: |
+            circle-android wait-for-boot
+      - run:
+          name: Disable emulator animations
+          command: |
+            adb shell settings put global window_animation_scale 0.0
+            adb shell settings put global transition_animation_scale 0.0
+            adb shell settings put global animator_duration_scale 0.0
+      - *build_test_android
+      - store_test_results:
+          path: core_android/build/outputs/androidTest-results/connected
+      - persist_to_workspace:
+          root: ~/
+          paths:
+            - circleci-caver-java-android/*
 
-              version=v$(.circleci/version.sh)
-              echo "Publishing a major android release! version=$version"
-              ./gradlew clean publish --stacktrace --debug
-              ./gradlew closeAndReleaseRepository --stacktrace --debug
+      - run:
+        name: "Publish android version"
+        command: |
+          version=v$(.circleci/version.sh)
+          echo "Publishing a major android release! version=$version"
+          ./gradlew clean publish --stacktrace --debug
+          ./gradlew closeAndReleaseRepository --stacktrace --debug
 
 workflows:
   version: 2
   workflow_build_deploy:
     jobs:
-    - build:
-        filters:
-          branches:
-            ignore:
-              - /release\/.*/
-              - master
-          # tags:
-          #   only: /^v[0-9]+\.[0-9]+\.[0-9]+/
-          #   only: /^v[0-9]+\.[0-9]+\.[0-9]+.*/
+      - build:
+          filters:
+            branches:
+              ignore:
+                - /release\/.*/
+                - master
+            # tags:
+            #   only: /^v[0-9]+\.[0-9]+\.[0-9]+/
+            #   only: /^v[0-9]+\.[0-9]+\.[0-9]+.*/
 
-    - android_build:
-        filters:
-          branches:
-            ignore:
-              - /release\/.*/
-              - master
-          # tags:
-          #   only: /^v[0-9]+\.[0-9]+\.[0-9]+/
-          #   only: /^v[0-9]+\.[0-9]+\.[0-9]+.*/
+      - android_build:
+          filters:
+            branches:
+              ignore:
+                - /release\/.*/
+                - master
+            # tags:
+            #   only: /^v[0-9]+\.[0-9]+\.[0-9]+/
+            #   only: /^v[0-9]+\.[0-9]+\.[0-9]+.*/
 
-    - tag_verify:
-        filters:
-          tags:
-            only: /^v[0-9]+\.[0-9]+\.[0-9]+.*/
-          branches:
-            ignore: /.*/
+      - tag_verify:
+          filters:
+            tags:
+              only: /^v[0-9]+\.[0-9]+\.[0-9]+.*/
+            branches:
+              ignore: /.*/
 
-    - tagger_verify:
-        filters:
-          tags:
-            only: /^v[0-9]+\.[0-9]+\.[0-9]+/
-          branches:
-            ignore: /.*/
+      - tagger_verify:
+          filters:
+            tags:
+              only: /^v[0-9]+\.[0-9]+\.[0-9]+/
+            branches:
+              ignore: /.*/
 
-    - release_PR:
-        requires:
-          - major_publish
-          - android_publish
-        filters:
-          tags:
-            only: /^v[0-9]+\.[0-9]+\.[0-9]+-rc.*/
-          branches:
-            ignore: /.*/
+      - release_PR:
+          requires:
+            - major_publish
+            - android_publish
+          filters:
+            tags:
+              only: /^v[0-9]+\.[0-9]+\.[0-9]+-rc.*/
+            branches:
+              ignore: /.*/
 
-    - major_tagging:
-        filters:
-          branches:
-            only: master
-          
-    - android_publish:
-        requires:
-          - tag_verify
-          - tagger_verify
-        # requires:
-        #   - android_build
-        filters:
-          tags: 
-            #only: /^v[0-9]+\.[0-9]+\.[0-9]+/
-            only: /^v[0-9]+\.[0-9]+\.[0-9]+.*/
-          branches:
-            ignore: /.*/
+      - major_tagging:
+          filters:
+            branches:
+              only: master
 
-    - major_publish:
-        requires:
-          # - build
-          - android_publish
-        filters:
-          tags:
-            #only: /^v[0-9]+\.[0-9]+\.[0-9]+/
-            only: /^v[0-9]+\.[0-9]+\.[0-9]+.*/
-          branches:
-            ignore: /.*/
+      - android_publish:
+          requires:
+            - tag_verify
+            - tagger_verify
+          # requires:
+          #   - android_build
+          filters:
+            tags:
+              #only: /^v[0-9]+\.[0-9]+\.[0-9]+/
+              only: /^v[0-9]+\.[0-9]+\.[0-9]+.*/
+            branches:
+              ignore: /.*/
+
+      - major_publish:
+          requires:
+            # - build
+            - android_publish
+          filters:
+            tags:
+              #only: /^v[0-9]+\.[0-9]+\.[0-9]+/
+              only: /^v[0-9]+\.[0-9]+\.[0-9]+.*/
+            branches:
+              ignore: /.*/

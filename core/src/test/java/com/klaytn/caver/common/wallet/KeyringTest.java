@@ -1,8 +1,25 @@
 package com.klaytn.caver.common.wallet;
 
-import com.klaytn.caver.account.*;
+import com.klaytn.caver.account.Account;
+import com.klaytn.caver.account.AccountKeyNil;
+import com.klaytn.caver.account.AccountKeyPublic;
+import com.klaytn.caver.account.AccountKeyRoleBased;
+import com.klaytn.caver.account.AccountKeyWeightedMultiSig;
+import com.klaytn.caver.account.IAccountKey;
+import com.klaytn.caver.account.WeightedMultiSigOptions;
+import com.klaytn.caver.account.WeightedPublicKey;
 import com.klaytn.caver.utils.Utils;
-import com.klaytn.caver.wallet.keyring.*;
+import com.klaytn.caver.wallet.keyring.AbstractKeyring;
+import com.klaytn.caver.wallet.keyring.KeyStore;
+import com.klaytn.caver.wallet.keyring.KeyStoreOption;
+import com.klaytn.caver.wallet.keyring.KeyringFactory;
+import com.klaytn.caver.wallet.keyring.MessageSigned;
+import com.klaytn.caver.wallet.keyring.MultipleKeyring;
+import com.klaytn.caver.wallet.keyring.PrivateKey;
+import com.klaytn.caver.wallet.keyring.RoleBasedKeyring;
+import com.klaytn.caver.wallet.keyring.SignatureData;
+import com.klaytn.caver.wallet.keyring.SingleKeyring;
+
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -17,8 +34,14 @@ import java.security.SignatureException;
 import java.util.Arrays;
 import java.util.List;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
+@RunWith(Suite.class)
+@Suite.SuiteClasses({KeyringTest.generateTest.class, KeyringTest.createFromPrivateKeyTest.class, KeyringTest.createFromKlaytnWalletKeyTest.class, KeyringTest.copyTest.class, KeyringTest.createWithSingleKeyTest.class, KeyringTest.createWithMultipleKeyTest.class, KeyringTest.createWithRoleBasedKeyTest.class, KeyringTest.copyTest.class, KeyringTest.signWithKeyTest.class, KeyringTest.signWithKeysTest.class, KeyringTest.signMessageTest.class, KeyringTest.recoverTest.class, KeyringTest.decryptTest.class, KeyringTest.encryptTest.class, KeyringTest.encryptV3Test.class, KeyringTest.getKeyByRoleTest.class, KeyringTest.getKlaytnWalletKeyTest.class, KeyringTest.getPublicKeyTest.class, KeyringTest.isDecoupledTest.class, KeyringTest.toAccountTest.class})
 public class KeyringTest {
 
     public static void checkValidateSingleKey(SingleKeyring actualKeyring, String expectedAddress, String expectedPrivateKey) {

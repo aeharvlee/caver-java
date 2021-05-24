@@ -2,16 +2,36 @@ package com.klaytn.caver.common.rpc;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.klaytn.caver.Caver;
-import com.klaytn.caver.account.*;
+import com.klaytn.caver.account.AccountKeyFail;
+import com.klaytn.caver.account.AccountKeyLegacy;
+import com.klaytn.caver.account.AccountKeyNil;
+import com.klaytn.caver.account.AccountKeyPublic;
+import com.klaytn.caver.account.AccountKeyRoleBased;
+import com.klaytn.caver.account.AccountKeyWeightedMultiSig;
 import com.klaytn.caver.base.Accounts;
 import com.klaytn.caver.kct.kip17.KIP17;
 import com.klaytn.caver.kct.kip17.KIP17DeployParams;
 import com.klaytn.caver.methods.request.CallObject;
 import com.klaytn.caver.methods.request.KlayFilter;
 import com.klaytn.caver.methods.request.KlayLogFilter;
-import com.klaytn.caver.methods.response.*;
 import com.klaytn.caver.methods.response.Account;
+import com.klaytn.caver.methods.response.AccountKey;
+import com.klaytn.caver.methods.response.Addresses;
+import com.klaytn.caver.methods.response.Block;
+import com.klaytn.caver.methods.response.BlockTransactionReceipts;
+import com.klaytn.caver.methods.response.BlockWithConsensusInfo;
 import com.klaytn.caver.methods.response.Boolean;
+import com.klaytn.caver.methods.response.Bytes;
+import com.klaytn.caver.methods.response.Bytes20;
+import com.klaytn.caver.methods.response.Bytes32;
+import com.klaytn.caver.methods.response.IAccountType;
+import com.klaytn.caver.methods.response.KlayLogs;
+import com.klaytn.caver.methods.response.KlayPeerCount;
+import com.klaytn.caver.methods.response.KlaySyncing;
+import com.klaytn.caver.methods.response.Quantity;
+import com.klaytn.caver.methods.response.SignTransaction;
+import com.klaytn.caver.methods.response.Transaction;
+import com.klaytn.caver.methods.response.TransactionReceipt;
 import com.klaytn.caver.rpc.Klay;
 import com.klaytn.caver.transaction.response.PollingTransactionReceiptProcessor;
 import com.klaytn.caver.transaction.response.TransactionReceiptProcessor;
@@ -23,9 +43,12 @@ import com.klaytn.caver.utils.Utils;
 import com.klaytn.caver.wallet.keyring.AbstractKeyring;
 import com.klaytn.caver.wallet.keyring.KeyringFactory;
 import com.klaytn.caver.wallet.keyring.SingleKeyring;
+
 import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
 import org.web3j.protocol.ObjectMapperFactory;
 import org.web3j.protocol.Web3jService;
 import org.web3j.protocol.core.DefaultBlockParameterName;
@@ -48,8 +71,10 @@ import static junit.framework.TestCase.assertFalse;
 import static junit.framework.TestCase.assertNotNull;
 import static junit.framework.TestCase.assertNull;
 import static junit.framework.TestCase.assertTrue;
-import static org.junit.Assert.*;
+import static org.junit.Assert.fail;
 
+@RunWith(Suite.class)
+@Suite.SuiteClasses({RpcTest.encodeAccountKeyTest.class, RpcTest.decodeAccountKeyTest.class, RpcTest.signTransactionTest.class, RpcTest.signTransactionAsFeePayerTest.class, RpcTest.sendTransactionAsFeePayerTest.class, RpcTest.getAccountKeyTest.class, RpcTest.otherRPCTest.class})
 public class RpcTest extends Accounts {
     static Caver caver = new Caver(Caver.DEFAULT_URL);
     static Klay klay = caver.rpc.klay;

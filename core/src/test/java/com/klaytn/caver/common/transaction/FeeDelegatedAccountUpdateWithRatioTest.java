@@ -7,11 +7,19 @@ import com.klaytn.caver.transaction.TransactionHasher;
 import com.klaytn.caver.transaction.TxPropertyBuilder;
 import com.klaytn.caver.transaction.type.FeeDelegatedAccountUpdateWithRatio;
 import com.klaytn.caver.transaction.type.TransactionType;
-import com.klaytn.caver.wallet.keyring.*;
+import com.klaytn.caver.wallet.keyring.AbstractKeyring;
+import com.klaytn.caver.wallet.keyring.MultipleKeyring;
+import com.klaytn.caver.wallet.keyring.PrivateKey;
+import com.klaytn.caver.wallet.keyring.RoleBasedKeyring;
+import com.klaytn.caver.wallet.keyring.SignatureData;
+import com.klaytn.caver.wallet.keyring.SingleKeyring;
+
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
 import org.web3j.utils.Numeric;
 
 import java.io.IOException;
@@ -20,9 +28,12 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 
-
+@RunWith(Suite.class)
+@Suite.SuiteClasses({FeeDelegatedAccountUpdateWithRatioTest.ExpectedData.class, FeeDelegatedAccountUpdateWithRatioTest.createInstanceBuilder.class, FeeDelegatedAccountUpdateWithRatioTest.createInstance.class, FeeDelegatedAccountUpdateWithRatioTest.getRLPEncodingTest.class, FeeDelegatedAccountUpdateWithRatioTest.signAsFeePayer_OneKeyTest.class, FeeDelegatedAccountUpdateWithRatioTest.signAsFeePayer_AllKeyTest.class, FeeDelegatedAccountUpdateWithRatioTest.appendFeePayerSignaturesTest.class, FeeDelegatedAccountUpdateWithRatioTest.combineSignatureTest.class, FeeDelegatedAccountUpdateWithRatioTest.getRawTransactionTest.class, FeeDelegatedAccountUpdateWithRatioTest.getTransactionHashTest.class, FeeDelegatedAccountUpdateWithRatioTest.getSenderTxHashTest.class, FeeDelegatedAccountUpdateWithRatioTest.getRLPEncodingForFeePayerSignatureTest.class})
 public class FeeDelegatedAccountUpdateWithRatioTest {
     static Caver caver = new Caver(Caver.DEFAULT_URL);
 

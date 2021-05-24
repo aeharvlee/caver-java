@@ -3,11 +3,27 @@ package com.klaytn.caver.common.abi;
 import com.klaytn.caver.Caver;
 import com.klaytn.caver.abi.EventValues;
 import com.klaytn.caver.abi.TypeDecoder;
-import com.klaytn.caver.abi.datatypes.*;
-import com.klaytn.caver.abi.datatypes.generated.*;
+import com.klaytn.caver.abi.datatypes.Address;
+import com.klaytn.caver.abi.datatypes.Bool;
+import com.klaytn.caver.abi.datatypes.Bytes;
+import com.klaytn.caver.abi.datatypes.DynamicArray;
+import com.klaytn.caver.abi.datatypes.DynamicBytes;
+import com.klaytn.caver.abi.datatypes.Int;
+import com.klaytn.caver.abi.datatypes.Type;
+import com.klaytn.caver.abi.datatypes.Uint;
+import com.klaytn.caver.abi.datatypes.Utf8String;
+import com.klaytn.caver.abi.datatypes.generated.Bytes1;
+import com.klaytn.caver.abi.datatypes.generated.Bytes4;
+import com.klaytn.caver.abi.datatypes.generated.Bytes6;
+import com.klaytn.caver.abi.datatypes.generated.Int256;
+import com.klaytn.caver.abi.datatypes.generated.StaticArray2;
+import com.klaytn.caver.abi.datatypes.generated.Uint256;
 import com.klaytn.caver.contract.Contract;
 import com.klaytn.caver.contract.ContractIOType;
+
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
@@ -19,6 +35,8 @@ import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 
+@RunWith(Suite.class)
+@Suite.SuiteClasses({ABITest.encodeFunctionSig.class, ABITest.encodeEventSig.class, ABITest.encodeFunctionCall.class, ABITest.decodeParameter.class, ABITest.decodeLog.class, ABITest.buildFunctionEventString.class})
 public class ABITest {
     static Caver caver = new Caver(Caver.DEFAULT_URL);
     public static class encodeFunctionSig {

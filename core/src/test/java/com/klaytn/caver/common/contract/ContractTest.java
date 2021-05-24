@@ -3,27 +3,27 @@ package com.klaytn.caver.common.contract;
 import com.klaytn.caver.Caver;
 import com.klaytn.caver.abi.ABI;
 import com.klaytn.caver.abi.EventValues;
-import com.klaytn.caver.contract.*;
+import com.klaytn.caver.abi.datatypes.Address;
+import com.klaytn.caver.abi.datatypes.Type;
+import com.klaytn.caver.abi.datatypes.Utf8String;
+import com.klaytn.caver.abi.datatypes.generated.Uint256;
+import com.klaytn.caver.contract.Contract;
+import com.klaytn.caver.contract.ContractDeployParams;
+import com.klaytn.caver.contract.EventFilterOptions;
+import com.klaytn.caver.contract.SendOptions;
 import com.klaytn.caver.methods.request.CallObject;
 import com.klaytn.caver.methods.request.KlayLogFilter;
 import com.klaytn.caver.methods.response.KlayLogs;
 import com.klaytn.caver.methods.response.TransactionReceipt;
 import com.klaytn.caver.wallet.KeyringContainer;
 
-import io.reactivex.disposables.Disposable;
 import org.junit.BeforeClass;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-
-import com.klaytn.caver.abi.datatypes.Address;
-import com.klaytn.caver.abi.datatypes.Type;
-import com.klaytn.caver.abi.datatypes.Utf8String;
-import com.klaytn.caver.abi.datatypes.generated.Uint256;
 import org.web3j.protocol.core.DefaultBlockParameterName;
 import org.web3j.protocol.exceptions.TransactionException;
 import org.web3j.protocol.websocket.WebSocketService;
-import org.web3j.protocol.websocket.events.Log;
 import org.web3j.protocol.websocket.events.LogNotification;
 import org.web3j.tx.gas.DefaultGasProvider;
 import org.web3j.utils.Numeric;
@@ -31,10 +31,19 @@ import org.web3j.utils.Numeric;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.math.BigInteger;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
-import static com.klaytn.caver.base.Accounts.*;
-import static org.junit.Assert.*;
+import io.reactivex.disposables.Disposable;
+
+import static com.klaytn.caver.base.Accounts.BRANDON;
+import static com.klaytn.caver.base.Accounts.LUMAN;
+import static com.klaytn.caver.base.Accounts.WAYNE;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 public class ContractTest {
     @Rule

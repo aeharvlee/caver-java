@@ -9,10 +9,13 @@ import com.klaytn.caver.wallet.keyring.AbstractKeyring;
 import com.klaytn.caver.wallet.keyring.PrivateKey;
 import com.klaytn.caver.wallet.keyring.RoleBasedKeyring;
 import com.klaytn.caver.wallet.keyring.SignatureData;
+
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
 import org.web3j.utils.Numeric;
 
 import java.io.IOException;
@@ -20,8 +23,12 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 
+@RunWith(Suite.class)
+@Suite.SuiteClasses({SmartContractExecutionTest.createInstanceBuilder.class, SmartContractExecutionTest.createInstance.class, SmartContractExecutionTest.getRLPEncodingTest.class, SmartContractExecutionTest.signWithKeyTest.class, SmartContractExecutionTest.signWithKeysTest.class, SmartContractExecutionTest.appendSignaturesTest.class, SmartContractExecutionTest.combineSignatureTest.class, SmartContractExecutionTest.getRawTransactionTest.class, SmartContractExecutionTest.getTransactionHashTest.class, SmartContractExecutionTest.getSenderTxHashTest.class, SmartContractExecutionTest.getRLPEncodingForSignatureTest.class})
 public class SmartContractExecutionTest {
 
     static Caver caver = new Caver(Caver.DEFAULT_URL);

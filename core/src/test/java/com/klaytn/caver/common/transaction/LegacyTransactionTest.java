@@ -8,10 +8,13 @@ import com.klaytn.caver.transaction.type.LegacyTransaction;
 import com.klaytn.caver.transaction.type.TransactionType;
 import com.klaytn.caver.wallet.keyring.AbstractKeyring;
 import com.klaytn.caver.wallet.keyring.SignatureData;
+
 import org.junit.BeforeClass;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
 import org.web3j.utils.Numeric;
 
 import java.io.IOException;
@@ -23,6 +26,8 @@ import java.util.List;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
+@RunWith(Suite.class)
+@Suite.SuiteClasses({LegacyTransactionTest.createInstance.class, LegacyTransactionTest.createInstanceBuilder.class, LegacyTransactionTest.signWithKeyTest.class, LegacyTransactionTest.signWithKeysTest.class, LegacyTransactionTest.getRLPEncodingTest.class, LegacyTransactionTest.combineSignatureTest.class, LegacyTransactionTest.getRawTransactionTest.class, LegacyTransactionTest.getTransactionHashTest.class, LegacyTransactionTest.getSenderTxHashTest.class, LegacyTransactionTest.getRLPEncodingForSignatureTest.class, LegacyTransactionTest.appendSignaturesTest.class})
 public class LegacyTransactionTest {
 
     public static class createInstance {

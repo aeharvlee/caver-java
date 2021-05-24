@@ -8,10 +8,13 @@ import com.klaytn.caver.transaction.type.ValueTransferMemo;
 import com.klaytn.caver.wallet.keyring.AbstractKeyring;
 import com.klaytn.caver.wallet.keyring.PrivateKey;
 import com.klaytn.caver.wallet.keyring.SignatureData;
+
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
 import org.web3j.utils.Numeric;
 
 import java.io.IOException;
@@ -20,8 +23,12 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 
+@RunWith(Suite.class)
+@Suite.SuiteClasses({ValueTransferMemoTest.createInstanceBuilder.class, ValueTransferMemoTest.createInstance.class, ValueTransferMemoTest.getRLPEncodingTest.class, ValueTransferMemoTest.signWithKeyTest.class, ValueTransferMemoTest.signWithKeysTest.class, ValueTransferMemoTest.appendSignaturesTest.class, ValueTransferMemoTest.combineSignatureTest.class, ValueTransferMemoTest.getRawTransactionTest.class, ValueTransferMemoTest.getTransactionHashTest.class, ValueTransferMemoTest.getSenderTxHashTest.class, ValueTransferMemoTest.getRLPEncodingForSignatureTest.class})
 public class ValueTransferMemoTest {
 
     static Caver caver = new Caver(Caver.DEFAULT_URL);

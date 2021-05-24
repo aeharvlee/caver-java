@@ -10,10 +10,13 @@ import com.klaytn.caver.transaction.type.TransactionType;
 import com.klaytn.caver.wallet.keyring.AbstractKeyring;
 import com.klaytn.caver.wallet.keyring.PrivateKey;
 import com.klaytn.caver.wallet.keyring.SignatureData;
+
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
 import org.web3j.utils.Numeric;
 
 import java.io.IOException;
@@ -22,9 +25,12 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 
-
+@RunWith(Suite.class)
+@Suite.SuiteClasses({AccountUpdateTest.ExpectedData.class, AccountUpdateTest.createInstanceBuilder.class, AccountUpdateTest.createInstance.class, AccountUpdateTest.getRLPEncodingTest.class, AccountUpdateTest.signWithKeyTest.class, AccountUpdateTest.signWithKeysTest.class, AccountUpdateTest.appendSignaturesTest.class, AccountUpdateTest.combineSignatureTest.class, AccountUpdateTest.getRawTransactionTest.class, AccountUpdateTest.getTransactionHashTest.class, AccountUpdateTest.getSenderTxHashTest.class, AccountUpdateTest.getRLPEncodingForSignatureTest.class})
 public class AccountUpdateTest {
     static Caver caver = new Caver(Caver.DEFAULT_URL);
 

@@ -28,7 +28,9 @@ allprojects {
 
     sourceCompatibility = 1.8
     targetCompatibility = 1.8
+}
 
+configure(allprojects.findAll {it.name != 'core_android'}) {
     apply plugin: 'java'
 
     repositories {
@@ -47,7 +49,7 @@ allprojects {
     }
 }
 
-configure(subprojects.findAll {it.name != 'integration-test' }) {
+configure(subprojects.findAll {it.name != 'integration-test' && it.name != 'core_android' }) {
     apply plugin: 'signing'
     apply plugin: 'maven-publish'
 

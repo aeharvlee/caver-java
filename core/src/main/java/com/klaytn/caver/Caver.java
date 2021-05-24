@@ -35,6 +35,7 @@ import org.web3j.protocol.http.HttpService;
 public class Caver {
 
     public static String DEFAULT_URL = "http://localhost:8551";
+    public static String ANDROID_DEFAULT_URL = "http://10.0.2.2:8551";
 
     /**
      * @deprecated Please use <code>caver.rpc.klay</code> instead.

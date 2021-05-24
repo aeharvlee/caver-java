@@ -7,11 +7,14 @@ import com.klaytn.caver.kct.kip17.KIP17;
 import com.klaytn.caver.kct.kip17.KIP17DeployParams;
 import com.klaytn.caver.methods.response.TransactionReceipt;
 import com.klaytn.caver.wallet.KeyringContainer;
+
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
 import org.web3j.protocol.exceptions.TransactionException;
 
 import java.io.IOException;
@@ -21,8 +24,14 @@ import java.util.Map;
 
 import static com.klaytn.caver.base.Accounts.BRANDON;
 import static com.klaytn.caver.base.Accounts.LUMAN;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
+@RunWith(Suite.class)
+@Suite.SuiteClasses({KIP17Test.BurnableTest.class, KIP17Test.CommonTest.class, KIP17Test.DetectInterfaceTest.class, KIP17Test.EnumerableTest.class, KIP17Test.MintableTest.class, KIP17Test.PausableTest.class})
 public class KIP17Test {
     public static KIP17 kip17Contract;
     public static final String CONTRACT_NAME = "NFT";

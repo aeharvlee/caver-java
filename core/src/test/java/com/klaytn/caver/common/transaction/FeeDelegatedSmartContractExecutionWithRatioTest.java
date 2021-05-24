@@ -4,11 +4,18 @@ import com.klaytn.caver.Caver;
 import com.klaytn.caver.transaction.TransactionHasher;
 import com.klaytn.caver.transaction.type.FeeDelegatedSmartContractExecutionWithRatio;
 import com.klaytn.caver.transaction.type.TransactionType;
-import com.klaytn.caver.wallet.keyring.*;
+import com.klaytn.caver.wallet.keyring.AbstractKeyring;
+import com.klaytn.caver.wallet.keyring.MultipleKeyring;
+import com.klaytn.caver.wallet.keyring.RoleBasedKeyring;
+import com.klaytn.caver.wallet.keyring.SignatureData;
+import com.klaytn.caver.wallet.keyring.SingleKeyring;
+
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
 import org.web3j.utils.Numeric;
 
 import java.io.IOException;
@@ -17,9 +24,12 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 
-
+@RunWith(Suite.class)
+@Suite.SuiteClasses({FeeDelegatedSmartContractExecutionWithRatioTest.createInstanceBuilder.class, FeeDelegatedSmartContractExecutionWithRatioTest.createInstance.class, FeeDelegatedSmartContractExecutionWithRatioTest.getRLPEncodingTest.class, FeeDelegatedSmartContractExecutionWithRatioTest.signAsFeePayer_OneKeyTest.class, FeeDelegatedSmartContractExecutionWithRatioTest.signAsFeePayer_AllKeyTest.class, FeeDelegatedSmartContractExecutionWithRatioTest.appendFeePayerSignaturesTest.class, FeeDelegatedSmartContractExecutionWithRatioTest.combineSignatureTest.class, FeeDelegatedSmartContractExecutionWithRatioTest.getRawTransactionTest.class, FeeDelegatedSmartContractExecutionWithRatioTest.getTransactionHashTest.class, FeeDelegatedSmartContractExecutionWithRatioTest.getSenderTxHashTest.class, FeeDelegatedSmartContractExecutionWithRatioTest.getRLPEncodingForFeePayerSignatureTest.class})
 public class FeeDelegatedSmartContractExecutionWithRatioTest {
     static Caver caver = new Caver(Caver.DEFAULT_URL);
     static String privateKey = "0x45a915e4d060149eb4365960e6a7a45f334393093061116b197e3240065ff2d8";

@@ -4,15 +4,22 @@ import com.klaytn.caver.Caver;
 import com.klaytn.caver.utils.Utils;
 import com.klaytn.caver.wallet.keyring.SignatureData;
 import com.klaytn.caver.wallet.keyring.SingleKeyring;
+
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
 
 import java.math.BigDecimal;
 import java.util.Arrays;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
+@RunWith(Suite.class)
+@Suite.SuiteClasses({UtilsTest.isAddressTest.class, UtilsTest.isValidPrivateKeyTest.class, UtilsTest.isKlaytnWalletKeyTest.class, UtilsTest.isValidPublicKeyTest.class, UtilsTest.decompressPublicKeyTest.class, UtilsTest.compressedPublicKeyTest.class, UtilsTest.hashMessageTest.class, UtilsTest.parseKlaytnWalletKeyTest.class, UtilsTest.isHexTest.class, UtilsTest.isHexStrictTest.class, UtilsTest.addHexPrefixTest.class, UtilsTest.stripHexPrefixTest.class, UtilsTest.convertToPebTest.class, UtilsTest.convertFromPebTest.class, UtilsTest.isNumberTest.class, UtilsTest.isEmptySigTest.class, UtilsTest.generateRandomBytesTest.class})
 public class UtilsTest {
     static Caver caver = new Caver(Caver.DEFAULT_URL);
     public static class isAddressTest {

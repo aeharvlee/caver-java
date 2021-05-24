@@ -5,11 +5,18 @@ import com.klaytn.caver.transaction.TransactionHasher;
 import com.klaytn.caver.transaction.TxPropertyBuilder;
 import com.klaytn.caver.transaction.type.FeeDelegatedValueTransfer;
 import com.klaytn.caver.transaction.type.TransactionType;
-import com.klaytn.caver.wallet.keyring.*;
+import com.klaytn.caver.wallet.keyring.AbstractKeyring;
+import com.klaytn.caver.wallet.keyring.MultipleKeyring;
+import com.klaytn.caver.wallet.keyring.RoleBasedKeyring;
+import com.klaytn.caver.wallet.keyring.SignatureData;
+import com.klaytn.caver.wallet.keyring.SingleKeyring;
+
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
 import org.web3j.utils.Numeric;
 
 import java.io.IOException;
@@ -17,8 +24,12 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 
+@RunWith(Suite.class)
+@Suite.SuiteClasses({FeeDelegatedValueTransferTest.createInstanceBuilder.class, FeeDelegatedValueTransferTest.createInstance.class, FeeDelegatedValueTransferTest.getRLPEncodingTest.class, FeeDelegatedValueTransferTest.signAsFeePayer_OneKeyTest.class, FeeDelegatedValueTransferTest.signAsFeePayer_AllKeyTest.class, FeeDelegatedValueTransferTest.appendFeePayerSignaturesTest.class, FeeDelegatedValueTransferTest.combineSignatureTest.class, FeeDelegatedValueTransferTest.getRawTransactionTest.class, FeeDelegatedValueTransferTest.getTransactionHashTest.class, FeeDelegatedValueTransferTest.getSenderTxHashTest.class, FeeDelegatedValueTransferTest.getRLPEncodingForFeePayerSignatureTest.class})
 public class FeeDelegatedValueTransferTest {
     static Caver caver = new Caver(Caver.DEFAULT_URL);
 
