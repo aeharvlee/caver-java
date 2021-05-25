@@ -91,6 +91,8 @@ jobs:
               awk '/version '\''/' build.gradle
             fi
       - *build_test
+      - store_test_results:
+          path: core/build/test-results/test
       - persist_to_workspace:
           root: ~/
           paths:
@@ -153,6 +155,8 @@ jobs:
             adb shell settings put global transition_animation_scale 0.0
             adb shell settings put global animator_duration_scale 0.0
       - *build_test_android
+      - store_test_results:
+          path: core_android/build/outputs/androidTest-results/connected
       - persist_to_workspace:
           root: ~/
           paths:
@@ -304,7 +308,6 @@ jobs:
             fi
             version=v$(.circleci/version.sh)
             echo "Publishing a major android release! version=$version"
-            ./gradlew clean build --stacktrace --debug -x :core_android:build
             ./gradlew clean publish --stacktrace --debug
             ./gradlew closeAndReleaseRepository --stacktrace --debug
 
