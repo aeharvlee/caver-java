@@ -67,6 +67,7 @@ build_test: &build_test
 build_test_android: &build_test_android
   run:
     name: "Build and do instrumented test on android emulator"
+    no_output_timeout: 20m
     command: |
       ./gradlew clean
       ./gradlew connectedAndroidTest
