@@ -22,7 +22,7 @@ android {
     buildToolsVersion "30.0.3"
 
     defaultConfig {
-        applicationId "com.klaytn.caver.andorid-instrumented-test"
+        applicationId "com.klaytn.caver.android_instrumented_test"
         minSdkVersion 24
         targetSdkVersion 30
         versionCode 1

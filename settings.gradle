@@ -1,6 +1,6 @@
 rootProject.name = 'caver-java'
 include 'codegen'
 include 'core'
-include 'andorid-instrumented-test'
+include 'android_instrumented_test'
 include 'console'
 include 'integration-test'
