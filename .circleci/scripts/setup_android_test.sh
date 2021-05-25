@@ -9,7 +9,7 @@ CORE_TEST_CAVER_DIR=$CORE_TEST_DIR/java/com/klaytn/caver
 
 ANDROID_DIR=$PROJECT_DIR/andorid-instrumented-test
 ANDROID_TEST_DIR=$PROJECT_DIR/andorid-instrumented-test/src/androidTest
-ANDROID_TEST_CAVER_DIR=$CORE_ANDROID_TEST_DIR/java/com/klaytn/caver/andorid-instrumented-test
+ANDROID_TEST_CAVER_DIR=$ANDROID_TEST_DIR/java/com/klaytn/caver/andorid-instrumented-test
 
 mkdir -p $ANDROID_TEST_CAVER_DIR
 
