@@ -30,7 +30,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 
 @RunWith(Suite.class)
-@Suite.SuiteClasses({AccountUpdateTest.ExpectedData.class, AccountUpdateTest.createInstanceBuilder.class, AccountUpdateTest.createInstance.class, AccountUpdateTest.getRLPEncodingTest.class, AccountUpdateTest.signWithKeyTest.class, AccountUpdateTest.signWithKeysTest.class, AccountUpdateTest.appendSignaturesTest.class, AccountUpdateTest.combineSignatureTest.class, AccountUpdateTest.getRawTransactionTest.class, AccountUpdateTest.getTransactionHashTest.class, AccountUpdateTest.getSenderTxHashTest.class, AccountUpdateTest.getRLPEncodingForSignatureTest.class})
+@Suite.SuiteClasses({AccountUpdateTest.createInstanceBuilder.class, AccountUpdateTest.createInstance.class, AccountUpdateTest.getRLPEncodingTest.class, AccountUpdateTest.signWithKeyTest.class, AccountUpdateTest.signWithKeysTest.class, AccountUpdateTest.appendSignaturesTest.class, AccountUpdateTest.combineSignatureTest.class, AccountUpdateTest.getRawTransactionTest.class, AccountUpdateTest.getTransactionHashTest.class, AccountUpdateTest.getSenderTxHashTest.class, AccountUpdateTest.getRLPEncodingForSignatureTest.class})
 public class AccountUpdateTest {
     static Caver caver = new Caver(Caver.DEFAULT_URL);
 
