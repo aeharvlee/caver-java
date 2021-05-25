@@ -71,7 +71,7 @@ build_test_android: &build_test_android
     command: |
       ./gradlew clean
       ./gradlew connectedAndroidTest
-      ./gradlew build --debug -x :core_android:build
+      ./gradlew build --debug -x :core_android:build -x test
 
 jobs:
   build:
