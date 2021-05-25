@@ -62,7 +62,7 @@ build_test: &build_test
     name: "Build and test"
     command: |
       ./gradlew clean
-      ./gradlew build --debug -x :core_android:build
+      ./gradlew build --debug -x :andorid-instrumented-test:build
 
 build_test_android: &build_test_android
   run:
@@ -71,7 +71,7 @@ build_test_android: &build_test_android
     command: |
       ./gradlew clean
       ./gradlew connectedAndroidTest
-      ./gradlew build --debug -x :core_android:build -x test
+      ./gradlew build --debug -x :andorid-instrumented-test:build -x test
 
 jobs:
   build:
@@ -156,7 +156,7 @@ jobs:
             adb shell settings put global animator_duration_scale 0.0
       - *build_test_android
       - store_test_results:
-          path: core_android/build/outputs/androidTest-results/connected
+          path: andorid-instrumented-test/build/outputs/androidTest-results/connected
       - persist_to_workspace:
           root: ~/
           paths:
