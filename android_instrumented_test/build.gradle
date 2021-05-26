@@ -31,11 +31,10 @@ android {
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
-    /*
-    sourceSets {
-        androidTest.manifest.srcFile "src/androidTest/AndroidManifest.xml"
+    compileOptions {
+        sourceCompatibility 1.8
+        targetCompatibility 1.8
     }
-    */
 }
 
 dependencies {
