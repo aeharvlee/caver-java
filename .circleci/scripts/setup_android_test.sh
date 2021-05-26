@@ -1,7 +1,6 @@
 #!/bin/sh
 
 PROJECT_DIR=~/circleci-caver-java-android
-cd $POJECT_DIR
 
 CORE_DIR=$PROJECT_DIR/core
 CORE_TEST_DIR=$PROJECT_DIR/core/src/test
