@@ -64,6 +64,14 @@ build_test: &build_test
         ./gradlew clean
         ./gradlew build --debug -x :android_instrumented_test:build
 
+logging: &logging
+  run:
+    name: "Start Dump logs from docker and android emulator"
+    command: |
+      mkdir logs
+      adb logcat > logs/adb.dump
+      docker logs -f $(docker ps -q) > logs/docker.logs
+
 build_test_android: &build_test_android
   run:
     name: "Build without unit tests and do instrumented test on Android Emulator"
@@ -146,6 +154,7 @@ jobs:
             adb shell settings put global window_animation_scale 0.0
             adb shell settings put global transition_animation_scale 0.0
             adb shell settings put global animator_duration_scale 0.0
+      - *logging
       - *build_test_android
       - store_test_results:
           path: android_instrumented_test/build/outputs/androidTest-results/connected
