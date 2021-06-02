@@ -76,7 +76,7 @@ stop_adb_logging: &stop_adb_logging
   run:
     name: "Stop logging about android emulator"
     command: |
-      pgrep -f "adb logcat > logs/adb.log"
+      kill $(pgrep -f "adb logcat > logs/adb.log")
 
 docker_logging: &docker_logging
   run:
@@ -89,7 +89,7 @@ stop_docker_logging: &stop_docker_logging
   run:
     name: "Stop logging about docker"
     command: |
-      pgrep -f "docker logs -f $(docker ps -q) > logs/docker.log"
+      kill $(pgrep -f "docker logs -f $(docker ps -q) > logs/docker.log")
 
 build_test_android: &build_test_android
   run:
