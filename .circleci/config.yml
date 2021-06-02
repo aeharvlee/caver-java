@@ -67,7 +67,7 @@ build_test: &build_test
 
 logging: &logging
   run:
-    name: "Start Dump logs from docker and android emulator"
+    name: "Start logging about docker and android emulator"
     command: |
       mkdir logs
       adb logcat > logs/adb.log &
