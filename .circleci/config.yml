@@ -82,14 +82,14 @@ docker_logging: &docker_logging
   run:
     name: "Start logging about docker"
     command: |
-      docker logs -f $(docker ps -q) > logs/docker.log 2>&1
+      docker logs -f $(docker ps -q) > logs/docker.log
     background: true
 
 stop_docker_logging: &stop_docker_logging
   run:
     name: "Stop logging about docker"
     command: |
-      pgrep -f "docker logs -f $(docker ps -q) > logs/docker.log 2>&1"
+      pgrep -f "docker logs -f $(docker ps -q) > logs/docker.log"
 
 build_test_android: &build_test_android
   run:
