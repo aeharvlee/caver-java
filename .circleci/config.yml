@@ -52,7 +52,6 @@ jobs:
             awk '/ext.web3jVersion = '\''/' build.gradle
       - *logging
       - *stop_logging
-      -
 workflows:
   version: 2
   workflow_build_deploy:
