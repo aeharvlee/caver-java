@@ -15,6 +15,7 @@ setup_android_test_files: &setup_android_test_files
 logging: &logging
   run:
     name: "Start logging example"
+    shell: /bin/bash
     command: |
       tail -f build.gradle
     background: true
