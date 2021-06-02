@@ -69,14 +69,15 @@ adb_logging: &adb_logging
   run:
     name: "Start logging about android emulator"
     command: |
-      mkdir logs
-      adb logcat > logs/adb.log &
+      adb logcat > logs/adb.log
+    background: true
 
 docker_logging: &docker_logging
   run:
     name: "Start logging about docker"
     command: |
-      docker logs -f $(docker ps -q) > logs/docker.log 2>&1 &
+      docker logs -f $(docker ps -q) > logs/docker.log 2>&1
+    background: true
 
 build_test_android: &build_test_android
   run:
@@ -160,6 +161,10 @@ jobs:
             adb shell settings put global window_animation_scale 0.0
             adb shell settings put global transition_animation_scale 0.0
             adb shell settings put global animator_duration_scale 0.0
+      - run:
+          name: Create logging directory
+          command: |
+            mkdir logs
       - *adb_logging
       - *docker_logging
       - *build_test_android
