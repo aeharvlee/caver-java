@@ -72,12 +72,24 @@ adb_logging: &adb_logging
       adb logcat > logs/adb.log
     background: true
 
+stop_adb_logging: &stop_adb_logging
+  run:
+    name: "Stop logging about android emulator"
+    command: |
+      pgrep -f "adb logcat > logs/adb.log"
+
 docker_logging: &docker_logging
   run:
     name: "Start logging about docker"
     command: |
       docker logs -f $(docker ps -q) > logs/docker.log 2>&1
     background: true
+
+stop_docker_logging: &stop_docker_logging
+  run:
+    name: "Stop logging about docker"
+    command: |
+      pgrep -f "docker logs -f $(docker ps -q) > logs/docker.log 2>&1"
 
 build_test_android: &build_test_android
   run:
@@ -170,6 +182,8 @@ jobs:
       - *build_test_android
       - store_test_results:
           path: android_instrumented_test/build/outputs/androidTest-results/connected
+      - *stop_adb_logging
+      - *stop_docker_logging
       - persist_to_workspace:
           root: ~/
           paths: 
