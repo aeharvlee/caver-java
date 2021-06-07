@@ -36,7 +36,7 @@ setup_android_test_files: &setup_android_test_files
   run:
     name: "Setup android instrumented test environment"
     command: |
-        bash .circleci/setup_android_instrumented_test.sh
+      bash .circleci/setup_android_instrumented_test.sh
 
 adb_logging: &adb_logging
   run:
@@ -49,48 +49,48 @@ pull_klaytn_image: &pull_klaytn_image
   run:
     name: "Pull and tag Klaytn image"
     command: |
-        docker pull klaytn/build_base:latest
-        docker image tag klaytn/build_base:latest klaytn
+      docker pull klaytn/build_base:latest
+      docker image tag klaytn/build_base:latest klaytn
 
 check_test_network: &check_test_network
   run:
     name: "Check test network"
     command: |
-        MAXRETRY=600
-        RETRY=0
-        while [ $RETRY -lt $MAXRETRY ]
-        do
-            if curl --fail -H "Content-Type: application/json" --data '{"jsonrpc":"2.0","method":"rpc_modules","params":[],"id":1}' http://localhost:8551 2>/dev/null; then
-                echo "Klaytn RPC server is up"
-                break
-            else
-                echo "wait for Klyatn RPC server..."
-                sleep 5
-            fi
-            RETRY=$(($RETRY+5))
-        done
-        if [ $RETRY -eq $MAXRETRY ]; then
-            echo "failed to connect Klaytn RPC server"
-            exit 1
-        fi
+      MAXRETRY=600
+      RETRY=0
+      while [ $RETRY -lt $MAXRETRY ]
+      do
+          if curl --fail -H "Content-Type: application/json" --data '{"jsonrpc":"2.0","method":"rpc_modules","params":[],"id":1}' http://localhost:8551 2>/dev/null; then
+              echo "Klaytn RPC server is up"
+              break
+          else
+              echo "wait for Klyatn RPC server..."
+              sleep 5
+          fi
+          RETRY=$(($RETRY+5))
+      done
+      if [ $RETRY -eq $MAXRETRY ]; then
+          echo "failed to connect Klaytn RPC server"
+          exit 1
+      fi
 
 start_test_network: &start_test_network
   run:
     name: "Start test network"
     working_directory: .circleci/images
     command: |
-        docker-compose up -d
+      docker-compose up -d
 
 build_test: &build_test
   run:
     name: "Build"
     command: |
-        ./gradlew clean
-        ./gradlew build --debug -x :android_instrumented_test:build -x test
+      ./gradlew clean
+      ./gradlew build --debug -x :android_instrumented_test:build -x test
 
 build_test_android: &build_test_android
   run:
-    name: "Build without unit tests and do instrumented test on Android Emulator"
+    name: "Build"
     no_output_timeout: 20m
     command: |
       ./gradlew clean
@@ -184,7 +184,7 @@ jobs:
             adb shell settings put global animator_duration_scale 0.0
       - *adb_logging
       - run:
-          name: Run android unit test
+          name: Run instrumented test on android emulator
           command: ./gradlew connectedDebugAndroidTest --debug --stacktrace
       - store_test_results:
           path: android_instrumented_test/build/outputs/androidTest-results/connected
@@ -193,7 +193,7 @@ jobs:
           destination: adb.log
 
   build_test_android:
-    <<: *machine_ubuntu
+    <<: *android_machine_ubuntu
     steps:
       - checkout
       - *check_android_version
@@ -241,28 +241,28 @@ jobs:
       - run:
           name: "Push to release branch"
           command: |
-              echo "push to release branch: /release/${CIRCLE_TAG%-*}"
-              git checkout -b release/${CIRCLE_TAG%-*}
-              git push origin release/${CIRCLE_TAG%-*}
+            echo "push to release branch: /release/${CIRCLE_TAG%-*}"
+            git checkout -b release/${CIRCLE_TAG%-*}
+            git push origin release/${CIRCLE_TAG%-*}
       - run:
-          name: "Install hub" 
+          name: "Install hub"
           command: |
-              curl -sSLf https://github.com/github/hub/releases/download/v2.12.3/hub-linux-amd64-2.12.3.tgz | \
-                tar zxf - --strip-components=1 -C /tmp && \
-                sudo mv /tmp/bin/hub /usr/local/bin/hub
-              type hub
+            curl -sSLf https://github.com/github/hub/releases/download/v2.12.3/hub-linux-amd64-2.12.3.tgz | \
+              tar zxf - --strip-components=1 -C /tmp && \
+              sudo mv /tmp/bin/hub /usr/local/bin/hub
+            type hub
       - run:
-          name: "Create pull request" 
+          name: "Create pull request"
           command: |
-              version=$(hub pr list -s open -L 10 -f "%H%n")
-              echo $version
+            version=$(hub pr list -s open -L 10 -f "%H%n")
+            echo $version
 
-              if [[ $version == *"release/${CIRCLE_TAG%-*}"* ]]; then
-                echo "PR already exist"
-              else
-                echo "hub pull-request -m "[Master] release/$CIRCLE_TAG QA Signoff" -b $CIRCLE_PROJECT_USERNAME:master -h $CIRCLE_PROJECT_USERNAME:${CIRCLE_TAG%-*}"
-                echo -e "[Master] release/${CIRCLE_TAG%-*} QA Sign-off\n\nThis PR is automatically created by CI to release a new official version of $CIRCLE_PROJECT_REPONAME.\n\nWhen this PR is approved by QA team, a new version will be released." | hub pull-request -b $CIRCLE_PROJECT_USERNAME:master -h $CIRCLE_PROJECT_USERNAME:release/${CIRCLE_TAG%-*} -r $GITHUB_reviewer -l circleci -F-
-              fi
+            if [[ $version == *"release/${CIRCLE_TAG%-*}"* ]]; then
+              echo "PR already exist"
+            else
+              echo "hub pull-request -m "[Master] release/$CIRCLE_TAG QA Signoff" -b $CIRCLE_PROJECT_USERNAME:master -h $CIRCLE_PROJECT_USERNAME:${CIRCLE_TAG%-*}"
+              echo -e "[Master] release/${CIRCLE_TAG%-*} QA Sign-off\n\nThis PR is automatically created by CI to release a new official version of $CIRCLE_PROJECT_REPONAME.\n\nWhen this PR is approved by QA team, a new version will be released." | hub pull-request -b $CIRCLE_PROJECT_USERNAME:master -h $CIRCLE_PROJECT_USERNAME:release/${CIRCLE_TAG%-*} -r $GITHUB_reviewer -l circleci -F-
+            fi
 
   major_tagging:
     <<: *defaults
@@ -272,24 +272,24 @@ jobs:
       - run:
           name: "Generate tag"
           command: |
-              current_version=$(.circleci/version.sh)
-              echo "git tag v$current_version"
-              git config --global user.email "team.devops@groundx.xyz"
-              git config --global user.name "circleci-klaytn"
-              git tag -a v$current_version -m "$CIRCLE_STAGE"
-              git push origin v$current_version
+            current_version=$(.circleci/version.sh)
+            echo "git tag v$current_version"
+            git config --global user.email "team.devops@groundx.xyz"
+            git config --global user.name "circleci-klaytn"
+            git tag -a v$current_version -m "$CIRCLE_STAGE"
+            git push origin v$current_version
       - run:
           name: "Delete release branch"
           command: |
-              #delete release branch. it trigger by merge title
-              version=v$(.circleci/version.sh)
+            #delete release branch. it trigger by merge title
+            version=v$(.circleci/version.sh)
 
-              if [[ "release/v" = $(git log --oneline -1 | grep -o "release/v") ]]; then
-                echo "Delete branch release/$version"
-                git push origin --delete release/$version
-              else
-                echo "Need to delete branch manually"
-              fi  
+            if [[ "release/v" = $(git log --oneline -1 | grep -o "release/v") ]]; then
+              echo "Delete branch release/$version"
+              git push origin --delete release/$version
+            else
+              echo "Need to delete branch manually"
+            fi
 
   major_publish:
     <<: *machine_ubuntu
@@ -307,12 +307,12 @@ jobs:
       - run:
           name: "Publish major version"
           command: |
-              version=v$(.circleci/version.sh)
+            version=v$(.circleci/version.sh)
 
-              echo "Publishing a major release! version=$version"
-              ./gradlew build --debug -x :android_instrumented_test:build
-              ./gradlew clean publish --stacktrace --debug
-              ./gradlew closeAndReleaseRepository --stacktrace --debug
+            echo "Publishing a major release! version=$version"
+            ./gradlew build --debug -x :android_instrumented_test:build
+            ./gradlew clean publish --stacktrace --debug
+            ./gradlew closeAndReleaseRepository --stacktrace --debug
       - notify-failure
       - notify-success
 
@@ -324,11 +324,11 @@ jobs:
       - run:
           name: "Publish android version"
           command: |
-              version=v$(.circleci/version.sh)
-              echo "Publishing a major android release! version=$version"
-              ./gradlew clean build --stacktrace --debug
-              ./gradlew clean publish --stacktrace --debug
-              ./gradlew closeAndReleaseRepository --stacktrace --debug
+            version=v$(.circleci/version.sh)
+            echo "Publishing a major android release! version=$version"
+            ./gradlew clean build --stacktrace --debug
+            ./gradlew clean publish --stacktrace --debug
+            ./gradlew closeAndReleaseRepository --stacktrace --debug
       - notify-failure
       - notify-success
 
@@ -340,7 +340,7 @@ stage_defaults:
           - /^v[0-9]+\.[0-9]+\.[0-9]+-rc\.[0-9]+.*/
           - /^v[0-9]+\.[0-9]+\.[0-9]+.*/
       branches:
-        ignore: 
+        ignore:
           - /release\/.*/
           - master
   tests: &test_steps
@@ -363,46 +363,46 @@ workflows:
   version: 2
   workflow_build_deploy:
     jobs:
-    - docs_test:
-        <<: *stage_default
-    - unit_test:
-        <<: *stage_default
-    - unit_test_android:
-        <<: *stage_default
-    - build_test:
-        <<: *stage_default
-    - build_test_android:
-        <<: *stage_default
+      - docs_test:
+          <<: *stage_default
+      - unit_test:
+          <<: *stage_default
+      - unit_test_android:
+          <<: *stage_default
+      - build_test:
+          <<: *stage_default
+      - build_test_android:
+          <<: *stage_default
 
-    - tag_verify:
-        <<: *stage_publish
+      - tag_verify:
+          <<: *stage_publish
 
-    - tagger_verify:
-        filters:
-          tags:
-            only: /^v[0-9]+\.[0-9]+\.[0-9]+/
-          branches:
-            ignore: /.*/
+      - tagger_verify:
+          filters:
+            tags:
+              only: /^v[0-9]+\.[0-9]+\.[0-9]+/
+            branches:
+              ignore: /.*/
 
-    - release_PR:
-        requires:
-          - major_publish
-          - android_publish
-        filters:
-          tags:
-            only: /^v[0-9]+\.[0-9]+\.[0-9]+-rc.*/
-          branches:
-            ignore: /.*/
+      - release_PR:
+          requires:
+            - major_publish
+            - android_publish
+          filters:
+            tags:
+              only: /^v[0-9]+\.[0-9]+\.[0-9]+-rc.*/
+            branches:
+              ignore: /.*/
 
-    - major_tagging:
-        filters:
-          branches:
-            only: master
-          
-    - android_publish:
-        <<: *test_steps
-        <<: *stage_publish
+      - major_tagging:
+          filters:
+            branches:
+              only: master
 
-    - major_publish:
-        <<: *test_steps
-        <<: *stage_publish
+      - android_publish:
+          <<: *test_steps
+          <<: *stage_publish
+
+      - major_publish:
+          <<: *test_steps
+          <<: *stage_publish
