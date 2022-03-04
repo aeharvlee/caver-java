@@ -19,13 +19,16 @@ package com.klaytn.caver.transaction.type;
 import com.klaytn.caver.rpc.Klay;
 import com.klaytn.caver.transaction.AbstractFeeDelegatedTransaction;
 import com.klaytn.caver.transaction.AbstractTransaction;
+import com.klaytn.caver.transaction.TransactionDecoder;
 import com.klaytn.caver.utils.BytesUtils;
 import com.klaytn.caver.utils.Utils;
 import com.klaytn.caver.wallet.keyring.SignatureData;
 import org.web3j.crypto.Hash;
+import org.web3j.protocol.core.DefaultBlockParameterName;
 import org.web3j.rlp.*;
 import org.web3j.utils.Numeric;
 
+import java.io.IOException;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -53,12 +56,18 @@ public class FeeDelegatedValueTransferMemo extends AbstractFeeDelegatedTransacti
     String input;
 
     /**
+     * A unit price of gas in peb the sender will pay for a transaction fee.
+     */
+    String gasPrice = "0x";
+
+    /**
      * FeeDelegatedValueTransferMemo Builder class
      */
     public static class Builder extends AbstractFeeDelegatedTransaction.Builder<FeeDelegatedValueTransferMemo.Builder> {
         String to;
         String value;
         String input;
+        String gasPrice = "0x";
 
         public Builder() {
             super(TransactionType.TxTypeFeeDelegatedValueTransferMemo.toString());
@@ -83,6 +92,16 @@ public class FeeDelegatedValueTransferMemo extends AbstractFeeDelegatedTransacti
             return this;
         }
 
+        public Builder setGasPrice(String gasPrice) {
+            this.gasPrice = gasPrice;
+            return this;
+        }
+
+        public Builder setGasPrice(BigInteger gasPrice) {
+            setGasPrice(Numeric.toHexStringWithPrefix(gasPrice));
+            return this;
+        }
+
         public FeeDelegatedValueTransferMemo build() {
             return new FeeDelegatedValueTransferMemo(this);
         }
@@ -103,7 +122,6 @@ public class FeeDelegatedValueTransferMemo extends AbstractFeeDelegatedTransacti
      * @param from The address of the sender.
      * @param nonce A value used to uniquely identify a sender’s transaction.
      * @param gas The maximum amount of gas the transaction is allowed to use.
-     * @param gasPrice A unit price of gas in peb the sender will pay for a transaction fee.
      * @param chainId Network ID.
      * @param signatures A sender signature list.
      * @param feePayer A fee payer address.
@@ -113,8 +131,8 @@ public class FeeDelegatedValueTransferMemo extends AbstractFeeDelegatedTransacti
      * @param input The message data attached to the transaction.
      * @return FeeDelegatedValueTransferMemo
      */
-    public static FeeDelegatedValueTransferMemo create(Klay klaytnCall, String from, String nonce, String gas, String gasPrice, String chainId, List<SignatureData> signatures, String feePayer, List<SignatureData> feePayerSignatures, String to, String value, String input) {
-        return new FeeDelegatedValueTransferMemo(klaytnCall, from, nonce, gas, gasPrice, chainId, signatures, feePayer, feePayerSignatures, to, value, input);
+    public static FeeDelegatedValueTransferMemo create(Klay klaytnCall, String from, String nonce, String gas, String chainId, List<SignatureData> signatures, String feePayer, List<SignatureData> feePayerSignatures, String to, String value, String input) {
+        return new FeeDelegatedValueTransferMemo(klaytnCall, from, nonce, gas, chainId, signatures, feePayer, feePayerSignatures, to, value, input);
     }
 
     /**
@@ -134,7 +152,6 @@ public class FeeDelegatedValueTransferMemo extends AbstractFeeDelegatedTransacti
      * @param from The address of the sender.
      * @param nonce A value used to uniquely identify a sender’s transaction.
      * @param gas The maximum amount of gas the transaction is allowed to use.
-     * @param gasPrice A unit price of gas in peb the sender will pay for a transaction fee.
      * @param chainId Network ID.
      * @param signatures A sender signature list.
      * @param feePayer A fee payer address.
@@ -143,14 +160,13 @@ public class FeeDelegatedValueTransferMemo extends AbstractFeeDelegatedTransacti
      * @param value The amount of KLAY in peb to be transferred.
      * @param input The message data attached to the transaction.
      */
-    public FeeDelegatedValueTransferMemo(Klay klaytnCall, String from, String nonce, String gas, String gasPrice, String chainId, List<SignatureData> signatures, String feePayer, List<SignatureData> feePayerSignatures, String to, String value, String input) {
+    public FeeDelegatedValueTransferMemo(Klay klaytnCall, String from, String nonce, String gas, String chainId, List<SignatureData> signatures, String feePayer, List<SignatureData> feePayerSignatures, String to, String value, String input) {
         super(
                 klaytnCall,
                 TransactionType.TxTypeFeeDelegatedValueTransferMemo.toString(),
                 from,
                 nonce,
                 gas,
-                gasPrice,
                 chainId,
                 signatures,
                 feePayer,
@@ -160,6 +176,38 @@ public class FeeDelegatedValueTransferMemo extends AbstractFeeDelegatedTransacti
         setTo(to);
         setValue(value);
         setInput(input);
+    }
+
+    /**
+     * Getter function for gas price
+     * @return String
+     */
+    public String getGasPrice() {
+        return gasPrice;
+    }
+
+    /**
+     * Setter function for gas price.
+     * @param gasPrice A unit price of gas in peb the sender will pay for a transaction fee.
+     */
+    public void setGasPrice(String gasPrice) {
+        if(gasPrice == null || gasPrice.isEmpty() || gasPrice.equals("0x")) {
+            gasPrice = "0x";
+        }
+
+        if(!gasPrice.equals("0x") && !Utils.isNumber(gasPrice)) {
+            throw new IllegalArgumentException("Invalid gasPrice. : " + gasPrice);
+        }
+
+        this.gasPrice = gasPrice;
+    }
+
+    /**
+     * Setter function for gas price.
+     * @param gasPrice A unit price of gas in peb the sender will pay for a transaction fee.
+     */
+    public void setGasPrice(BigInteger gasPrice) {
+        setGasPrice(Numeric.toHexStringWithPrefix(gasPrice));
     }
 
     /**
@@ -321,6 +369,18 @@ public class FeeDelegatedValueTransferMemo extends AbstractFeeDelegatedTransacti
     }
 
     /**
+     * Checks that member variables that can be defined by the user are defined.
+     * If there is an undefined variable, an error occurs.
+     */
+    @Override
+    public void validateOptionalValues(boolean checkChainID) {
+        super.validateOptionalValues(checkChainID);
+        if(this.getGasPrice() == null || this.getGasPrice().isEmpty() || this.getGasPrice().equals("0x")) {
+            throw new RuntimeException("gasPrice is undefined. Define gasPrice in transaction or use 'transaction.fillTransaction' to fill values.");
+        }
+    }
+
+    /**
      * Check equals txObj passed parameter and Current instance.
      * @param obj The AbstractFeeDelegatedTransaction Object to compare
      * @param checkSig Check whether signatures field is equal.
@@ -335,8 +395,72 @@ public class FeeDelegatedValueTransferMemo extends AbstractFeeDelegatedTransacti
         if(!this.getTo().toLowerCase().equals(txObj.getTo().toLowerCase())) return false;
         if(!Numeric.toBigInt(this.getValue()).equals(Numeric.toBigInt(txObj.getValue()))) return false;
         if(!this.getInput().equals(txObj.getInput())) return false;
+        if(!this.getGasPrice().equals(txObj.getGasPrice())) return false;
 
         return true;
+    }
+
+    @Override
+    public void fillTransaction() throws IOException {
+        Klay klaytnCall = this.getKlaytnCall();
+        if(klaytnCall != null) {
+            if(this.getNonce().equals("0x")) {
+                this.setNonce(klaytnCall.getTransactionCount(this.getFrom(), DefaultBlockParameterName.PENDING).send().getResult());
+            }
+
+            if(this.getChainId().equals("0x")) {
+                this.setChainId(klaytnCall.getChainID().send().getResult());
+            }
+
+            if(this.gasPrice.equals("0x")) {
+                this.setGasPrice(klaytnCall.getGasPrice().send().getResult());
+            }
+
+        }
+
+        if(this.getNonce().equals("0x") || this.getChainId().equals("0x") || this.getGasPrice().equals("0x")) {
+            throw new RuntimeException("Cannot fill transaction data.(nonce, chainId, gasPrice). `klaytnCall` must be set in Transaction instance to automatically fill the nonce, chainId or gasPrice. Please call the `setKlaytnCall` to set `klaytnCall` in the Transaction instance.");
+        }
+    }
+
+    @Override
+    public String combineSignedRawTransactions(List<String> rlpEncoded) {
+        boolean fillVariable = false;
+
+        // If the signatures are empty, there may be an undefined member variable.
+        // In this case, the empty information is filled with the decoded result.
+        // At initial state of AbstractFeeDelegateTx Object, feePayerSignature field has one empty signature.
+        if((Utils.isEmptySig(this.getFeePayerSignatures())) || Utils.isEmptySig(this.getSignatures())) fillVariable = true;
+
+        for(String encodedStr : rlpEncoded) {
+            AbstractFeeDelegatedTransaction decode = (AbstractFeeDelegatedTransaction) TransactionDecoder.decode(encodedStr);
+            if (!decode.getType().equals(this.getType())) {
+                continue;
+            }
+            FeeDelegatedValueTransferMemo txObj = (FeeDelegatedValueTransferMemo) decode;
+
+            if(fillVariable) {
+                if(this.getNonce().equals("0x")) this.setNonce(txObj.getNonce());
+                if(this.getGasPrice().equals("0x")) this.setGasPrice(txObj.getGasPrice());
+                if(this.getFeePayer().equals("0x") || this.getFeePayer().equals(Utils.DEFAULT_ZERO_ADDRESS)) {
+                    if(!txObj.getFeePayer().equals("0x") && !txObj.getFeePayer().equals(Utils.DEFAULT_ZERO_ADDRESS)) {
+                        this.setFeePayer(txObj.getFeePayer());
+                        fillVariable = false;
+                    }
+                }
+            }
+
+            // Signatures can only be combined for the same transaction.
+            // Therefore, compare whether the decoded transaction is the same as this.
+            if(!this.compareTxField(txObj, false)) {
+                throw new RuntimeException("Transactions containing different information cannot be combined.");
+            }
+
+            this.appendSignatures(txObj.getSignatures());
+            this.appendFeePayerSignatures(txObj.getFeePayerSignatures());
+        }
+
+        return this.getRLPEncoding();
     }
 
     /**

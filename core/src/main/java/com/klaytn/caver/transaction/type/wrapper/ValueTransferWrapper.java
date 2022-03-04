@@ -79,7 +79,6 @@ public class ValueTransferWrapper {
      * @param from The address of the sender.
      * @param nonce A value used to uniquely identify a sender’s transaction.
      * @param gas The maximum amount of gas the transaction is allowed to use.
-     * @param gasPrice A unit price of gas in peb the sender will pay for a transaction fee.
      * @param chainId Network ID
      * @param signatures A Signature list
      * @param to The account address that will receive the transferred value.
@@ -87,8 +86,8 @@ public class ValueTransferWrapper {
      * @param input The message data attached to the transaction.
      * @return ValueTransferMemo
      */
-    public ValueTransferMemo create(String from, String nonce, String gas, String gasPrice, String chainId, List<SignatureData> signatures, String to, String value, String input) {
-        return ValueTransferMemo.create(klaytnCall, from, nonce, gas, gasPrice, chainId, signatures, to, value, input);
+    public ValueTransferMemo create(String from, String nonce, String gas, String chainId, List<SignatureData> signatures, String to, String value, String input) {
+        return ValueTransferMemo.create(klaytnCall, from, nonce, gas, chainId, signatures, to, value, input);
     }
 
     /**

@@ -78,13 +78,12 @@ public class CancelWrapper {
      * @param from The address of the sender.
      * @param nonce A value used to uniquely identify a sender’s transaction.
      * @param gas The maximum amount of gas the transaction is allowed to use.
-     * @param gasPrice A unit price of gas in peb the sender will pay for a transaction fee.
      * @param chainId Network ID
      * @param signatures A Signature list
      * @return Cancel
      */
-    public Cancel create(String from, String nonce, String gas, String gasPrice, String chainId, List<SignatureData> signatures) {
-        return Cancel.create(klaytnCall, from, nonce, gas, gasPrice, chainId, signatures);
+    public Cancel create(String from, String nonce, String gas, String chainId, List<SignatureData> signatures) {
+        return Cancel.create(klaytnCall, from, nonce, gas, chainId, signatures);
     }
 
     /**

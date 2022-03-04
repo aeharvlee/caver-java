@@ -78,7 +78,6 @@ public class FeeDelegatedSmartContractDeployWrapper {
      * @param from The address of the sender.
      * @param nonce A value used to uniquely identify a sender’s transaction.
      * @param gas The maximum amount of gas the transaction is allowed to use.
-     * @param gasPrice A unit price of gas in peb the sender will pay for a transaction fee.
      * @param chainId Network ID
      * @param signatures A Signature list
      * @param feePayer A fee payer address.
@@ -90,8 +89,8 @@ public class FeeDelegatedSmartContractDeployWrapper {
      * @param codeFormat The code format of smart contract code
      * @return FeeDelegatedSmartContractDeploy
      */
-    public FeeDelegatedSmartContractDeploy create(String from, String nonce, String gas, String gasPrice, String chainId, List<SignatureData> signatures, String feePayer, List<SignatureData> feePayerSignatures, String to, String value, String input, boolean humanReadable, String codeFormat) {
-        return FeeDelegatedSmartContractDeploy.create(klaytnCall, from, nonce, gas, gasPrice, chainId, signatures, feePayer, feePayerSignatures, to, value, input, humanReadable, codeFormat);
+    public FeeDelegatedSmartContractDeploy create(String from, String nonce, String gas, String chainId, List<SignatureData> signatures, String feePayer, List<SignatureData> feePayerSignatures, String to, String value, String input, boolean humanReadable, String codeFormat) {
+        return FeeDelegatedSmartContractDeploy.create(klaytnCall, from, nonce, gas, chainId, signatures, feePayer, feePayerSignatures, to, value, input, humanReadable, codeFormat);
     }
 
     /**

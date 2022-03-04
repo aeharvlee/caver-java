@@ -78,14 +78,13 @@ public class ChainDataAnchoringWrapper {
      * @param from The address of the sender.
      * @param nonce A value used to uniquely identify a sender’s transaction.
      * @param gas The maximum amount of gas the transaction is allowed to use.
-     * @param gasPrice A unit price of gas in peb the sender will pay for a transaction fee.
      * @param chainId Network ID
      * @param signatures A Signature list
      * @param input Data of the service chain.
      * @return ChainDataAnchoring
      */
-    public ChainDataAnchoring create(String from, String nonce, String gas, String gasPrice, String chainId, List<SignatureData> signatures, String input) {
-        return ChainDataAnchoring.create(klaytnCall, from, nonce, gas, gasPrice, chainId, signatures, input);
+    public ChainDataAnchoring create(String from, String nonce, String gas, String chainId, List<SignatureData> signatures, String input) {
+        return ChainDataAnchoring.create(klaytnCall, from, nonce, gas, chainId, signatures, input);
     }
 
     /**

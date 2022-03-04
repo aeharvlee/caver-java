@@ -18,12 +18,15 @@ package com.klaytn.caver.transaction.type;
 
 import com.klaytn.caver.rpc.Klay;
 import com.klaytn.caver.transaction.AbstractTransaction;
+import com.klaytn.caver.transaction.TransactionDecoder;
 import com.klaytn.caver.utils.BytesUtils;
 import com.klaytn.caver.utils.Utils;
 import com.klaytn.caver.wallet.keyring.SignatureData;
+import org.web3j.protocol.core.DefaultBlockParameterName;
 import org.web3j.rlp.*;
 import org.web3j.utils.Numeric;
 
+import java.io.IOException;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -40,10 +43,16 @@ public class ChainDataAnchoring extends AbstractTransaction {
     String input;
 
     /**
+     * A unit price of gas in peb the sender will pay for a transaction fee.
+     */
+    String gasPrice = "0x";
+
+    /**
      * ChainDataAnchoring Builder class
      */
     public static class Builder extends AbstractTransaction.Builder<ChainDataAnchoring.Builder> {
         String input;
+        String gasPrice = "0x";
 
         public Builder() {
             super(TransactionType.TxTypeChainDataAnchoring.toString());
@@ -51,6 +60,16 @@ public class ChainDataAnchoring extends AbstractTransaction {
 
         public Builder setInput(String input) {
             this.input = input;
+            return this;
+        }
+
+        public Builder setGasPrice(String gasPrice) {
+            this.gasPrice = gasPrice;
+            return this;
+        }
+
+        public Builder setGasPrice(BigInteger gasPrice) {
+            setGasPrice(Numeric.toHexStringWithPrefix(gasPrice));
             return this;
         }
 
@@ -74,14 +93,13 @@ public class ChainDataAnchoring extends AbstractTransaction {
      * @param from The address of the sender.
      * @param nonce A value used to uniquely identify a sender’s transaction.
      * @param gas The maximum amount of gas the transaction is allowed to use.
-     * @param gasPrice A unit price of gas in peb the sender will pay for a transaction fee.
      * @param chainId Network ID
      * @param signatures A Signature list
      * @param input Data of the service chain.
      * @return ChainDataAnchoring
      */
-    public static ChainDataAnchoring create(Klay klaytnCall, String from, String nonce, String gas, String gasPrice, String chainId, List<SignatureData> signatures, String input) {
-        return new ChainDataAnchoring(klaytnCall, from, nonce, gas, gasPrice, chainId, signatures, input);
+    public static ChainDataAnchoring create(Klay klaytnCall, String from, String nonce, String gas, String chainId, List<SignatureData> signatures, String input) {
+        return new ChainDataAnchoring(klaytnCall, from, nonce, gas, chainId, signatures, input);
     }
 
     /**
@@ -99,14 +117,45 @@ public class ChainDataAnchoring extends AbstractTransaction {
      * @param from The address of the sender.
      * @param nonce A value used to uniquely identify a sender’s transaction.
      * @param gas The maximum amount of gas the transaction is allowed to use.
-     * @param gasPrice A unit price of gas in peb the sender will pay for a transaction fee.
      * @param chainId Network ID
      * @param signatures A Signature list
      * @param input Data of the service chain.
      */
-    public ChainDataAnchoring(Klay klaytnCall, String from, String nonce, String gas, String gasPrice, String chainId, List<SignatureData> signatures, String input) {
-        super(klaytnCall, TransactionType.TxTypeChainDataAnchoring.toString(), from, nonce, gas, gasPrice, chainId, signatures);
+    public ChainDataAnchoring(Klay klaytnCall, String from, String nonce, String gas, String chainId, List<SignatureData> signatures, String input) {
+        super(klaytnCall, TransactionType.TxTypeChainDataAnchoring.toString(), from, nonce, gas, chainId, signatures);
         setInput(input);
+    }
+
+    /**
+     * Getter function for gas price
+     * @return String
+     */
+    public String getGasPrice() {
+        return gasPrice;
+    }
+
+    /**
+     * Setter function for gas price.
+     * @param gasPrice A unit price of gas in peb the sender will pay for a transaction fee.
+     */
+    public void setGasPrice(String gasPrice) {
+        if(gasPrice == null || gasPrice.isEmpty() || gasPrice.equals("0x")) {
+            gasPrice = "0x";
+        }
+
+        if(!gasPrice.equals("0x") && !Utils.isNumber(gasPrice)) {
+            throw new IllegalArgumentException("Invalid gasPrice. : " + gasPrice);
+        }
+
+        this.gasPrice = gasPrice;
+    }
+
+    /**
+     * Setter function for gas price.
+     * @param gasPrice A unit price of gas in peb the sender will pay for a transaction fee.
+     */
+    public void setGasPrice(BigInteger gasPrice) {
+        setGasPrice(Numeric.toHexStringWithPrefix(gasPrice));
     }
 
     /**
@@ -126,6 +175,7 @@ public class ChainDataAnchoring extends AbstractTransaction {
     public static ChainDataAnchoring decode(byte[] rlpEncoded) {
         // TxHashRLP = type + encode([nonce, gasPrice, gas, from, anchoredData, txSignatures])
         if(rlpEncoded[0] != (byte)TransactionType.TxTypeChainDataAnchoring.getType()) {
+
             throw new IllegalArgumentException("Invalid RLP-encoded tag - " + TransactionType.TxTypeChainDataAnchoring.toString());
         }
 
@@ -226,6 +276,7 @@ public class ChainDataAnchoring extends AbstractTransaction {
         ChainDataAnchoring txObj = (ChainDataAnchoring)obj;
 
         if(!this.getInput().equals(txObj.getInput())) return false;
+        if (!this.getGasPrice().equals(txObj.getGasPrice())) return false;
 
         return true;
     }
@@ -252,5 +303,73 @@ public class ChainDataAnchoring extends AbstractTransaction {
         }
 
         this.input = Numeric.prependHexPrefix(input);
+    }
+
+    /**
+     * Checks that member variables that can be defined by the user are defined.
+     * If there is an undefined variable, an error occurs.
+     */
+    @Override
+    public void validateOptionalValues(boolean checkChainID) {
+        super.validateOptionalValues(checkChainID);
+        if(this.getGasPrice() == null || this.getGasPrice().isEmpty() || this.getGasPrice().equals("0x")) {
+            throw new RuntimeException("gasPrice is undefined. Define gasPrice in transaction or use 'transaction.fillTransaction' to fill values.");
+        }
+    }
+
+    @Override
+    public void fillTransaction() throws IOException {
+        Klay klaytnCall = this.getKlaytnCall();
+        if(klaytnCall != null) {
+            if(this.getNonce().equals("0x")) {
+                this.setNonce(klaytnCall.getTransactionCount(this.getFrom(), DefaultBlockParameterName.PENDING).send().getResult());
+            }
+
+            if(this.getChainId().equals("0x")) {
+                this.setChainId(klaytnCall.getChainID().send().getResult());
+            }
+
+            if(this.gasPrice.equals("0x")) {
+                this.setGasPrice(klaytnCall.getGasPrice().send().getResult());
+            }
+
+        }
+
+        if(this.getNonce().equals("0x") || this.getChainId().equals("0x") || this.getGasPrice().equals("0x")) {
+            throw new RuntimeException("Cannot fill transaction data.(nonce, chainId, gasPrice). `klaytnCall` must be set in Transaction instance to automatically fill the nonce, chainId or gasPrice. Please call the `setKlaytnCall` to set `klaytnCall` in the Transaction instance.");
+        }
+    }
+
+    @Override
+    public String combineSignedRawTransactions(List<String> rlpEncoded) {
+        boolean fillVariable = false;
+
+        // If the signatures are empty, there may be an undefined member variable.
+        // In this case, the empty information is filled with the decoded result.
+        if(Utils.isEmptySig(this.getSignatures())) fillVariable = true;
+
+        for(String encodedStr : rlpEncoded) {
+            AbstractTransaction decode = TransactionDecoder.decode(encodedStr);
+            if (!decode.getType().equals(this.getType())) {
+                continue;
+            }
+            ChainDataAnchoring txObj = (ChainDataAnchoring) decode;
+
+            if(fillVariable) {
+                if(this.getNonce().equals("0x")) this.setNonce(txObj.getNonce());
+                if(this.getGasPrice().equals("0x")) this.setGasPrice(txObj.getGasPrice());
+                fillVariable = false;
+            }
+
+            // Signatures can only be combined for the same transaction.
+            // Therefore, compare whether the decoded transaction is the same as this.
+            if(!this.compareTxField(txObj, false)) {
+                throw new RuntimeException("Transactions containing different information cannot be combined.");
+            }
+
+            this.appendSignatures(txObj.getSignatures());
+        }
+
+        return this.getRLPEncoding();
     }
 }
